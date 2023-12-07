@@ -1,0 +1,4 @@
+<resources>
+
+    <style name="Theme.HDrezka" parent="Theme.AppCompat.DayNight.NoActionBar" />
+</resources>
