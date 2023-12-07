@@ -1,4 +1,4 @@
-package com.mihan.hdrezka
+package com.mihan.hdrezka.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,9 +8,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Surface
-import com.mihan.hdrezka.ui.theme.HDrezkaTheme
+import com.mihan.hdrezka.presentation.screens.main.NavGraphs
+import com.mihan.hdrezka.presentation.ui.theme.HDrezkaTheme
+import com.ramcosta.composedestinations.DestinationsNavHost
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalTvMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,7 +24,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     shape = RectangleShape
                 ) {
-
+                    DestinationsNavHost(navGraph = NavGraphs.root)
                 }
             }
         }
