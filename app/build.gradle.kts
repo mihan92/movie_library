@@ -39,7 +39,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.5"
     }
     packaging {
         resources {
@@ -54,7 +54,7 @@ kapt {
 
 dependencies {
 
-    val hilt_version = "2.48"
+    val hilt_version = "2.49"
     val navigation_version = "1.9.55"
 
     implementation("androidx.core:core-ktx:1.12.0")
@@ -69,6 +69,7 @@ dependencies {
     //DI
     implementation("com.google.dagger:hilt-android:$hilt_version")
     kapt ("com.google.dagger:hilt-compiler:$hilt_version")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
     //Navigation
     implementation("io.github.raamcosta.compose-destinations:core:$navigation_version")
@@ -79,4 +80,8 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }

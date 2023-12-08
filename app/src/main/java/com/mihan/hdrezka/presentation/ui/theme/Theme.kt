@@ -13,7 +13,8 @@ fun HDrezkaTheme(
     val colorScheme = darkColorScheme(
         primary = primaryColor,
         secondary = secondaryColor,
-        background = backgroundColor
+        background = backgroundColor,
+        onBackground = onBackgroundColor
     )
     MaterialTheme(
         colorScheme = colorScheme,

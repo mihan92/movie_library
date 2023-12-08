@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">HDrezka</string>
+    <string name="home_route_title">Главная</string>
+    <string name="settings_route_title">Настройки</string>
+    <string name="search_route_title">Поиск</string>
 </resources>
