@@ -1,6 +1,20 @@
 <resources>
-    <string name="app_name">HDrezka</string>
+    <string name="app_name">Movie Library</string>
     <string name="home_route_title">Главная</string>
     <string name="settings_route_title">Настройки</string>
     <string name="search_route_title">Поиск</string>
+    <string name="bt_watch">Смотреть</string>
+    <string name="rating_hdr_title">Рейтинг HdRezka: %\s</string>
+    <string name="current_page_title">Страница %\d</string>
+    <string name="filter_last_title">Последние поступления</string>
+    <string name="filter_popular_title">Популярные</string>
+    <string name="filter_soon_title">В ожидании</string>
+    <string name="filter_watching_title">Сейчас смотрят</string>
+    <string name="all_title">Все</string>
+    <string name="film_title">Фильмы</string>
+    <string name="serial_title">Сериалы</string>
+    <string name="cartoon_title">Мультфильмы</string>
+    <string name="animation_title">Аниме</string>
+    <string name="tv_show_title">ТВ Шоу</string>
+    <string name="voicecover_title">Озвучка</string>
 </resources>
