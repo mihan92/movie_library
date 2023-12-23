@@ -57,7 +57,9 @@ fun DrawerContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxHeight(),
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.background.copy(0.7f))
+            .fillMaxHeight(),
         verticalArrangement = Arrangement.Center
     ) {
         DrawerItems.entries.forEach { item ->

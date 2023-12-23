@@ -2,9 +2,6 @@ package com.mihan.movie.library.di
 
 import com.mihan.movie.library.common.Constants
 import com.mihan.movie.library.data.remote.ApiService
-import com.mihan.movie.library.data.repository.ParserRepositoryImpl
-import com.mihan.movie.library.domain.ParserRepository
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,10 +16,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 interface AppModule {
-
-    @Binds
-    fun bindsRepository(impl: ParserRepositoryImpl): ParserRepository
-
     companion object {
 
         @Provides

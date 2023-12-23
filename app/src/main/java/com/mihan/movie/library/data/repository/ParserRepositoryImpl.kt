@@ -10,6 +10,7 @@ import com.mihan.movie.library.data.models.VideoDetailDto
 import com.mihan.movie.library.data.models.VideoDto
 import com.mihan.movie.library.data.models.VideoItemDto
 import com.mihan.movie.library.domain.ParserRepository
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -17,10 +18,19 @@ import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@ActivityRetainedScoped
 class ParserRepositoryImpl @Inject constructor() : ParserRepository {
+
+    /**
+     * Кэшируем список фильмов после первой загрузки, чтобы при каждом обращении не качать его снова.
+     * Если текущие данные совпадают, то отдаем лист с кэшированными данными, если нет, качаем порцию фильмов снова.
+     */
+    private val cashedListVideo = mutableListOf<VideoItemDto>()
+    private var currentPage = -1
+    private var currentFilter = Filter.Watching
+    private var currentVideoCategory = VideoCategory.All
+
     private fun getConnection(filmUrl: String): Connection = Jsoup
         .connect(filmUrl)
         .ignoreContentType(true)
@@ -39,33 +49,40 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
      */
     override suspend fun getListVideo(filter: Filter, videoCategory: VideoCategory, page: Int): List<VideoItemDto> =
         withContext(Dispatchers.IO) {
-            val listOfMovies = mutableListOf<VideoItemDto>()
-            val document = getConnection(getUrl(page, filter.section, videoCategory.genre)).get()
-            val element = document.select("div.b-content__inline_item")
-            for (i in 0 until element.size) {
-                val title = element.select("div.b-content__inline_item-link")
-                    .select("a")
-                    .eq(i)
-                    .text()
-                val imageUrl = element.select("img")
-                    .eq(i)
-                    .attr("src")
-                val movieUrl = element.select("div.b-content__inline_item-cover")
-                    .select("a")
-                    .eq(i)
-                    .attr("href")
-                val category = element.select("i.entity")
-                    .eq(i)
-                    .text()
-                val movie = VideoItemDto(
-                    title = title,
-                    category = category,
-                    imageUrl = imageUrl,
-                    videoUrl = movieUrl
-                )
-                listOfMovies.add(movie)
+            if(currentFilter == filter && currentVideoCategory == videoCategory && currentPage == page) {
+                cashedListVideo.toList()
+            } else {
+                cashedListVideo.clear()
+                val document = getConnection(getUrl(page, filter.section, videoCategory.genre)).get()
+                val element = document.select("div.b-content__inline_item")
+                for (i in 0 until element.size) {
+                    val title = element.select("div.b-content__inline_item-link")
+                        .select("a")
+                        .eq(i)
+                        .text()
+                    val imageUrl = element.select("img")
+                        .eq(i)
+                        .attr("src")
+                    val movieUrl = element.select("div.b-content__inline_item-cover")
+                        .select("a")
+                        .eq(i)
+                        .attr("href")
+                    val category = element.select("i.entity")
+                        .eq(i)
+                        .text()
+                    val movie = VideoItemDto(
+                        title = title,
+                        category = category,
+                        imageUrl = imageUrl,
+                        videoUrl = movieUrl
+                    )
+                    cashedListVideo.add(movie)
+                }
+                currentFilter = filter
+                currentVideoCategory = videoCategory
+                currentPage = page
+                cashedListVideo.toList()
             }
-            listOfMovies.toList()
         }
 
     /**

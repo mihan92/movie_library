@@ -69,7 +69,7 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.1.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
-    implementation("androidx.activity:activity-compose:1.8.1")
+    implementation("androidx.activity:activity-compose:1.8.2")
 
     //DI
     implementation("com.google.dagger:hilt-android:$hilt_version")
@@ -77,7 +77,7 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
     //Navigation
-    implementation("io.github.raamcosta.compose-destinations:core:$navigation_version")
+    implementation("io.github.raamcosta.compose-destinations:animations-core:$navigation_version")
     ksp("io.github.raamcosta.compose-destinations:ksp:$navigation_version")
 
     //Retrofit

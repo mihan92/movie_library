@@ -1,4 +1,6 @@
 <resources>
 
-    <style name="Theme.HDrezka" parent="Theme.AppCompat.DayNight.NoActionBar" />
+    <style name="Theme.HDrezka" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:background">@android:color/black</item>
+    </style>
 </resources>
