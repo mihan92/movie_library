@@ -3,6 +3,7 @@ package com.mihan.movie.library.presentation.ui.view
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,35 +12,42 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.window.Dialog
+import androidx.tv.foundation.lazy.list.TvLazyColumn
+import androidx.tv.foundation.lazy.list.TvLazyListScope
+import androidx.tv.foundation.lazy.list.items
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
+import com.mihan.movie.library.R
 import com.mihan.movie.library.presentation.ui.size10dp
+import com.mihan.movie.library.presentation.ui.size14sp
+import com.mihan.movie.library.presentation.ui.size16dp
+import com.mihan.movie.library.presentation.ui.size16sp
 import com.mihan.movie.library.presentation.ui.size28dp
+import com.mihan.movie.library.presentation.ui.size8dp
 
-private const val DIALOG_FRACTION = 0.8f
-private const val DIALOG_RATIO = 3 / 2f
-private const val DROP_DOWN_MENU_FRACTION = 0.365f
+private const val DIALOG_RATIO = 2 / 1.5f
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 fun SerialDialog(
     isDialogShow: State<Boolean>,
@@ -54,117 +62,172 @@ fun SerialDialog(
         Dialog(onDismissRequest = onDialogDismiss) {
             Column(
                 modifier = modifier
-                    .fillMaxSize(DIALOG_FRACTION)
+                    .fillMaxSize()
                     .aspectRatio(DIALOG_RATIO)
                     .background(Color.DarkGray),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (translations.isNotEmpty())
-                    ExpandableTranslationsSection(
-                        listOfTranslations = translations.keys.toList(),
-                        onTranslationItemClicked = onTranslationItemClicked,
-                        modifier = modifier,
-                    )
-                LazyColumn {
-                    items(seasons.keys.toList()) {season ->
-                        var isExpanded by rememberSaveable { mutableStateOf(false) }
-                        ExpandableSectionTitle(
-                            title = "Сезон $season",
-                            isExpanded = isExpanded,
-                            modifier = Modifier.clickable { isExpanded = true }
-                        )
-                        DropdownMenu(
-                            modifier = modifier
-                                .fillMaxWidth(DROP_DOWN_MENU_FRACTION)
-                                .background(Color.DarkGray),
-                            expanded = isExpanded,
-                            onDismissRequest = { isExpanded = false }
-                        ) {
-                            seasons.getValue(season).forEach { episode ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = "Серия $episode",
-                                            color = MaterialTheme.colorScheme.onBackground
-                                        )
-                                    },
-                                    onClick = {
-                                        onEpisodeClicked(season, episode)
-                                        isExpanded = false
-                                    })
+                ExpandableTranslationList(
+                    translations = translations.keys.toList(),
+                    onTranslationItemClicked = onTranslationItemClicked
+                )
+                ExpandableSeasonList(
+                    sections = seasons,
+                    onEpisodeClicked = onEpisodeClicked
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun ExpandableTranslationList(
+    translations: List<String>,
+    onTranslationItemClicked: (String) -> Unit,
+) {
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
+    var selectedElement by rememberSaveable { mutableStateOf(translations.first()) }
+    Column {
+        TextField(
+            value = selectedElement,
+            textStyle = TextStyle(fontSize = size16sp),
+            onValueChange = {},
+            readOnly = true,
+            label = {
+                Text(
+                    text = stringResource(id = R.string.voicecover_title),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = size14sp
+                )
+            },
+            trailingIcon = { ExpanableIcon(isExpanded = isExpanded) },
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.Transparent,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { isExpanded = !isExpanded }
+        )
+        if (isExpanded) {
+            TvLazyColumn {
+                items(translations) { translateItem ->
+                    DialogText(
+                        title = translateItem,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                selectedElement = translateItem
+                                onTranslationItemClicked(translateItem)
+                                isExpanded = false
                             }
-                        }
-                    }
+                    )
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun ExpandableTranslationsSection(
-    listOfTranslations: List<String>,
-    onTranslationItemClicked: (String) -> Unit,
-    modifier: Modifier = Modifier
+private fun ExpandableSeasonList(
+    sections: Map<String, List<String>>,
+    onEpisodeClicked: (String, String) -> Unit
 ) {
-    var isExpanded by rememberSaveable { mutableStateOf(false) }
-    var selectedElement by rememberSaveable { mutableStateOf(listOfTranslations.first()) }
-    Column(
-        modifier = modifier
-            .clickable { isExpanded = !isExpanded }
-            .background(color = Color.DarkGray)
-    ) {
-        ExpandableSectionTitle(isExpanded = isExpanded, title = selectedElement)
-        DropdownMenu(
-            modifier = modifier
-                .fillMaxWidth(DROP_DOWN_MENU_FRACTION)
-                .background(Color.DarkGray),
-            expanded = isExpanded,
-            onDismissRequest = { isExpanded = false }
-        ) {
-            listOfTranslations.forEach { translator ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = translator,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
+    val isExpandedMap = remember { List(sections.size) { index: Int -> index to false }.toMutableStateMap() }
+    TvLazyColumn(
+        content = {
+            sections.onEachIndexed { index, value ->
+                section(
+                    header = value.key,
+                    listData = value.value,
+                    isExpanded = isExpandedMap[index] ?: true,
+                    onHeaderClick = {
+                        isExpandedMap[index] = !(isExpandedMap[index] ?: true)
                     },
-                    onClick = {
-                        selectedElement = translator
-                        onTranslationItemClicked(selectedElement)
-                        isExpanded = false
-                    })
+                    onEpisodeClicked = { onEpisodeClicked(value.key, it) }
+                )
             }
+        }
+    )
+}
+
+@Composable
+private fun SectionHeader(
+    seasonTitle: String,
+    isExpanded: Boolean,
+    onHeaderClicked: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onHeaderClicked() }
+            .background(Color.DarkGray)
+            .padding(vertical = size8dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        DialogText(title = stringResource(id = R.string.season_title, seasonTitle))
+        ExpanableIcon(
+            isExpanded = isExpanded,
+            modifier = Modifier.padding(end = size10dp)
+        )
+    }
+}
+
+private fun TvLazyListScope.section(
+    header: String,
+    listData: List<String>,
+    isExpanded: Boolean,
+    onEpisodeClicked: (String) -> Unit,
+    onHeaderClick: () -> Unit
+) {
+    item {
+        SectionHeader(
+            seasonTitle = header,
+            isExpanded = isExpanded,
+            onHeaderClicked = onHeaderClick
+        )
+    }
+    if (isExpanded) {
+        items(listData) {
+            DialogText(
+                title = stringResource(id = R.string.episode_title, it),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onEpisodeClicked(it) }
+            )
         }
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun ExpandableSectionTitle(
-    title: String,
+@OptIn(ExperimentalTvMaterial3Api::class)
+private fun ExpanableIcon(
     isExpanded: Boolean,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val icon = if (isExpanded) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown
-    Row(
+    Image(
+        modifier = modifier.size(size28dp),
+        imageVector = icon,
+        colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onBackground),
+        contentDescription = null
+    )
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun DialogText(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = title,
+        fontSize = size16sp,
+        color = MaterialTheme.colorScheme.onBackground,
         modifier = modifier
-            .fillMaxWidth()
-            .padding(size10dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = title,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Image(
-            modifier = Modifier.size(size28dp),
-            imageVector = icon,
-            colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.onBackground),
-            contentDescription = null
-        )
-    }
+            .padding(vertical = size8dp, horizontal = size16dp)
+            .focusable()
+    )
 }

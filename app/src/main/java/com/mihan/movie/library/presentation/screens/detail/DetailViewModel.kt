@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mihan.movie.library.common.Constants.EMPTY_STRING
 import com.mihan.movie.library.common.DtoState
 import com.mihan.movie.library.domain.models.StreamModel
 import com.mihan.movie.library.domain.models.VideoModel
@@ -35,6 +36,7 @@ class DetailViewModel @Inject constructor(
     private val _listOfStreams = MutableStateFlow<List<StreamModel>?>(null)
     private val _videoData = MutableStateFlow(VideoModel())
     private var _translatorId = _videoData.value.translations.values.firstOrNull()
+    private var seasonAndEpisodeTitle = Pair(EMPTY_STRING, EMPTY_STRING)
 
     val videoData = _videoData.asStateFlow()
     val showFilmDialog = _showFilmDialog.asStateFlow()
@@ -133,6 +135,7 @@ class DetailViewModel @Inject constructor(
     }
 
     fun onEpisodeClicked(season: String, episode: String) {
+        seasonAndEpisodeTitle = season to episode
         _translatorId?.let { id ->
             getStreamsBySeasonId(id, _videoData.value.videoId, season, episode)
         }
@@ -156,8 +159,14 @@ class DetailViewModel @Inject constructor(
             val maxQuality = selectedStream.last()
             val videoPath = maxQuality.url
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoPath))
+            val title =
+                if (!_videoData.value.isVideoHasSeries) screenState.value.detailInfo?.title
+                else
+                    "${screenState.value.detailInfo?.title}" +
+                            "  /  ${seasonAndEpisodeTitle.first} сезон" +
+                            "  ${seasonAndEpisodeTitle.second} серия"
             intent.setDataAndType(Uri.parse(videoPath), "video/*")
-            intent.putExtra("title", screenState.value.detailInfo?.title)
+            intent.putExtra("title", title)
             context.startActivity(intent)
         } catch (e: Exception) {
             _screenState.value = DetailScreenState(

@@ -7,8 +7,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
@@ -16,9 +17,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -57,6 +58,7 @@ import com.mihan.movie.library.presentation.ui.size16sp
 import com.mihan.movie.library.presentation.ui.size28dp
 import com.mihan.movie.library.presentation.ui.size2dp
 import com.mihan.movie.library.presentation.ui.size4dp
+import com.mihan.movie.library.presentation.ui.size6dp
 import com.mihan.movie.library.presentation.ui.size8dp
 import com.mihan.movie.library.presentation.ui.theme.primaryColor
 import com.mihan.movie.library.presentation.ui.view.PageFooter
@@ -151,7 +153,7 @@ private fun Content(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalTvMaterial3Api::class)
 @Composable
 private fun MovieItem(
     title: String,
@@ -161,19 +163,21 @@ private fun MovieItem(
     modifier: Modifier = Modifier
 ) {
     var borderColor by remember { mutableStateOf(Color.Transparent) }
+    var focusedCard by remember { mutableStateOf(false) }
     Card(
         modifier = modifier
             .aspectRatio(2 / 3f)
             .padding(size10dp)
             .onFocusChanged {
+                focusedCard = it.isFocused
                 borderColor = if (it.isFocused) primaryColor else Color.Transparent
             },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
         onClick = onItemClick,
         shape = RoundedCornerShape(size8dp),
         border = BorderStroke(size2dp, borderColor)
     ) {
         Box(
-            modifier = Modifier.background(Color.DarkGray),
             contentAlignment = Alignment.TopEnd
         ) {
             Column(
@@ -186,23 +190,29 @@ private fun MovieItem(
                     contentDescription = title,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .padding(size4dp)
                         .clip(RoundedCornerShape(size8dp))
                         .weight(1f),
                 )
-                VideoTitle(title = title)
+                VideoTitle(
+                    title = title,
+                    isFocused = focusedCard
+                )
             }
             if (category.isNotEmpty())
-                Category(category)
+                Category(
+                    filmCategory = category,
+                    modifier = Modifier.padding(top = size6dp)
+                )
         }
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class)
+@OptIn(ExperimentalTvMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun VideoTitle(
     title: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isFocused: Boolean
 ) {
     Box(
         modifier = Modifier
@@ -218,7 +228,7 @@ private fun VideoTitle(
             textAlign = TextAlign.Center,
             modifier = modifier
                 .padding(horizontal = size2dp)
-                .horizontalScroll(rememberScrollState()),
+                .basicMarquee( iterations = if (isFocused) 1 else 0)
         )
     }
 
@@ -227,12 +237,16 @@ private fun VideoTitle(
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun Category(
-    filmCategory: String
+    filmCategory: String,
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
-            .background(VideoCategory.getColorFromCategory(filmCategory), RoundedCornerShape(size4dp))
-            .padding(size4dp)
+        modifier = modifier
+            .background(
+                VideoCategory.getColorFromCategory(filmCategory),
+                RoundedCornerShape(topStart = size6dp, bottomStart = size6dp)
+            )
+            .padding(horizontal = size10dp, vertical = size4dp)
     ) {
         Text(
             text = filmCategory,
