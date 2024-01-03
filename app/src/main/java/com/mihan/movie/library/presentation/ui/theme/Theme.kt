@@ -7,7 +7,7 @@ import androidx.tv.material3.darkColorScheme
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun HDrezkaTheme(
+fun MovieLibraryTheme(
     content: @Composable () -> Unit,
 ) {
     val colorScheme = darkColorScheme(

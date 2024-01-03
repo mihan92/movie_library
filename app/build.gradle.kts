@@ -19,11 +19,15 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
+        setProperty("archivesBaseName", rootProject.name)
     }
 
     buildTypes {
+        debug {
+            versionNameSuffix = "-debug"
+        }
         release {
+            versionNameSuffix = "-release"
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
@@ -54,7 +58,6 @@ kapt {
 
 dependencies {
 
-    implementation("androidx.media3:media3-extractor:1.2.0")
     val hilt_version = "2.49"
     val navigation_version = "1.9.55"
     val retrofit_version = "2.9.0"
@@ -66,6 +69,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.tv:tv-foundation:1.0.0-alpha07")
     implementation("androidx.tv:tv-material:1.0.0-alpha07")
+    implementation("androidx.media3:media3-extractor:1.2.0")
     implementation("androidx.compose.material3:material3:1.1.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")

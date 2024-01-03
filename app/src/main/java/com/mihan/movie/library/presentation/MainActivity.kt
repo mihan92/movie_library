@@ -27,7 +27,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.rememberDrawerState
 import com.mihan.movie.library.presentation.navigation.Screens
 import com.mihan.movie.library.presentation.screens.NavGraphs
-import com.mihan.movie.library.presentation.ui.theme.HDrezkaTheme
+import com.mihan.movie.library.presentation.ui.theme.MovieLibraryTheme
 import com.mihan.movie.library.presentation.ui.view.DrawerContent
 import com.ramcosta.composedestinations.DestinationsNavHost
 import dagger.hilt.android.AndroidEntryPoint
@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            HDrezkaTheme {
+            MovieLibraryTheme {
                 val navController by remember { derivedStateOf { this.navController } }
                 val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
