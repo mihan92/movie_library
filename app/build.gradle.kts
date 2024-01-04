@@ -15,7 +15,7 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = 1
-        versionName = "0.1"
+        versionName = "0.1.0"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -41,6 +41,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.5"
@@ -62,6 +63,7 @@ dependencies {
     val navigation_version = "1.9.55"
     val retrofit_version = "2.9.0"
     val coil_version = "2.5.0"
+    val data_store_version = "1.0.0"
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -94,6 +96,9 @@ dependencies {
 
     //Load Images
     implementation("io.coil-kt:coil-compose:$coil_version")
+
+    //DataStore
+    implementation("androidx.datastore:datastore-preferences:$data_store_version")
 
     //Tests
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
