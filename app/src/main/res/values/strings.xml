@@ -21,5 +21,7 @@
     <string name="episode_title">Серия %\s</string>
     <string name="updates_route_title">Обновление</string>
     <string name="update_title">Обновить</string>
-    <string name="new_version_is_available">Доступна новвая версия %\s</string>
+    <string name="new_version_is_available">Доступна новая версия %\s</string>
+    <string name="downloading_title">Загрузка</string>
+    <string name="cancel_title">Отменить</string>
 </resources>

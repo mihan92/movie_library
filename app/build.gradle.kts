@@ -1,3 +1,5 @@
+import java.util.Locale
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -14,12 +16,12 @@ android {
         applicationId = "com.mihan.movie.library"
         minSdk = 28
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0"
         vectorDrawables {
             useSupportLibrary = true
         }
-        setProperty("archivesBaseName", rootProject.name)
+        setProperty("archivesBaseName", rootProject.name.lowercase(Locale.getDefault()))
     }
 
     buildTypes {
@@ -59,7 +61,7 @@ kapt {
 
 dependencies {
 
-    val hilt_version = "2.49"
+    val hilt_version = "2.50"
     val navigation_version = "1.9.55"
     val retrofit_version = "2.9.0"
     val coil_version = "2.5.0"
@@ -105,8 +107,4 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
-}
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
 }

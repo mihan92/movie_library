@@ -1,12 +1,16 @@
 package com.mihan.movie.library.di
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import android.app.DownloadManager
+import android.content.Context
 import com.mihan.movie.library.common.Constants
+import com.mihan.movie.library.common.utils.DownloadManagerImpl
+import com.mihan.movie.library.common.utils.IDownloadManager
 import com.mihan.movie.library.data.remote.GsonApiService
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -18,7 +22,16 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 interface AppModule {
+
+    @Binds
+    fun provideIDownloadManager(impl: DownloadManagerImpl): IDownloadManager
+
     companion object {
+
+        @Provides
+        @Singleton
+        fun provideSystemDownloadManager(@ApplicationContext context: Context) =
+            context.getSystemService(DownloadManager::class.java)
 
         @Provides
         @Singleton
@@ -32,7 +45,6 @@ interface AppModule {
         fun provideInterseptor(): HttpLoggingInterceptor = HttpLoggingInterceptor()
             .setLevel(HttpLoggingInterceptor.Level.BASIC)
 
-
         @Provides
         @Singleton
         fun provideOkHttpClient(interseptor: HttpLoggingInterceptor): OkHttpClient = OkHttpClient.Builder()
@@ -41,14 +53,8 @@ interface AppModule {
 
         @Provides
         @Singleton
-        fun provideGson() = GsonBuilder()
-            .setLenient()
-            .create()
-
-        @Provides
-        @Singleton
-        fun provideRetrofit(client: OkHttpClient, gson: Gson) = Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create(gson))
+        fun provideRetrofit(client: OkHttpClient) = Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
             .client(client)
     }
 }
