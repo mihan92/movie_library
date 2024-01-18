@@ -177,6 +177,36 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
         list.toList()
     }
 
+    override suspend fun getVideosByTitle(videoTitle: String): List<VideoItemDto> = withContext(Dispatchers.IO) {
+        val list = mutableListOf<VideoItemDto>()
+        val document = getConnection(BASE_URL + SEARCH_URL).data("q", videoTitle).post()
+        val element = document.select("div.b-content__inline_item")
+        for (i in 0 until element.size) {
+            val title = element.select("div.b-content__inline_item-link")
+                .select("a")
+                .eq(i)
+                .text()
+            val imageUrl = element.select("img")
+                .eq(i)
+                .attr("src")
+            val movieUrl = element.select("div.b-content__inline_item-cover")
+                .select("a")
+                .eq(i)
+                .attr("href")
+            val category = element.select("i.entity")
+                .eq(i)
+                .text()
+            val movie = VideoItemDto(
+                title = title,
+                category = category,
+                imageUrl = imageUrl,
+                videoUrl = movieUrl
+            )
+            list.add(movie)
+        }
+        list.toList()
+    }
+
     private suspend fun getStreamsByUrl(
         document: Document,
         isVideoHasTranslation: Boolean,
@@ -331,5 +361,6 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
         private const val GET_STREAM_POST = "/ajax/get_cdn_series"
         private const val RUSSIAN_TRANSLATOR_NAME = "Оригинальный"
         private const val RUSSIAN_TRANSLATOR_ID = "110"
+        private const val SEARCH_URL = "/search/?do=search&subaction=search"
     }
 }

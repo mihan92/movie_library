@@ -24,4 +24,7 @@
     <string name="new_version_is_available">Доступна новая версия %\s</string>
     <string name="downloading_title">Загрузка</string>
     <string name="cancel_title">Отменить</string>
+    <string name="hint_enter_query">Введите название</string>
+    <string name="hint_no_results">По вашему запросу ничего не найдено</string>
+    <string name="toast_confirm_exit">Нажмите ещё раз для выхода</string>
 </resources>

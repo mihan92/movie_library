@@ -15,4 +15,6 @@ interface ParserRepository {
     suspend fun getTranslationsByUrl(url: String): VideoDto
 
     suspend fun getStreamsBySeasonId(translationId: String, videoId: String, season: String, episode: String): List<StreamDto>
+
+    suspend fun getVideosByTitle(videoTitle: String): List<VideoItemDto>
 }

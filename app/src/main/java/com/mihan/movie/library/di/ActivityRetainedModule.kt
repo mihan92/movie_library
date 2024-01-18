@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
+import com.mihan.movie.library.common.utils.VoiceRecognizer
 import com.mihan.movie.library.data.repository.AppUpdateRepositoryImpl
 import com.mihan.movie.library.data.repository.ParserRepositoryImpl
 import com.mihan.movie.library.domain.AppUpdateRepository
@@ -26,6 +27,10 @@ interface ActivityRetainedModule {
     fun bindsAppUpdateRepository(impl: AppUpdateRepositoryImpl): AppUpdateRepository
 
     companion object {
+
+        @[Provides ActivityRetainedScoped]
+        fun provideVoiceRecognizer(@ApplicationContext context: Context) = VoiceRecognizer(context)
+
         @[Provides ActivityRetainedScoped]
         fun provideNavController(
             @ApplicationContext context: Context

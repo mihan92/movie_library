@@ -1,7 +1,9 @@
 package com.mihan.movie.library.presentation
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -26,6 +28,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.ModalNavigationDrawer
 import androidx.tv.material3.Surface
 import androidx.tv.material3.rememberDrawerState
+import com.mihan.movie.library.R
 import com.mihan.movie.library.common.DataStorePrefs
 import com.mihan.movie.library.common.utils.AppUpdatesChecker
 import com.mihan.movie.library.presentation.navigation.Screens
@@ -52,6 +55,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         appUpdatesChecker.checkUpdates()
+        onBackPressedCallback()
         setContent {
             MovieLibraryTheme {
                 val appUpdateState = dataStorePrefs.getAppUpdates().collectAsStateWithLifecycle(initialValue = false)
@@ -96,6 +100,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun onBackPressedCallback() {
+        var currentTimeInMillis = System.currentTimeMillis()
+        onBackPressedDispatcher.addCallback {
+            if (currentTimeInMillis + TIME_INTERVAL > System.currentTimeMillis())
+                finish()
+            else {
+                Toast.makeText(this@MainActivity, getString(R.string.toast_confirm_exit), Toast.LENGTH_SHORT).show()
+                currentTimeInMillis = System.currentTimeMillis()
+            }
+        }
+    }
+
     companion object {
         private val screensWithDrawer = listOf(
             Screens.Home.route,
@@ -104,6 +120,7 @@ class MainActivity : ComponentActivity() {
             Screens.Placeholder.route,
             Screens.AppUpdatesScreen.route
         )
+        private const val TIME_INTERVAL = 3000L
     }
 }
 

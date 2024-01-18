@@ -4,9 +4,9 @@
     <value>
       <entry key="app">
         <State>
-          <targetSelectedWithDropDown>
+          <runningDeviceTargetSelectedWithDropDown>
             <Target>
-              <type value="QUICK_BOOT_TARGET" />
+              <type value="RUNNING_DEVICE_TARGET" />
               <deviceKey>
                 <Key>
                   <type value="VIRTUAL_DEVICE_PATH" />
@@ -14,8 +14,8 @@
                 </Key>
               </deviceKey>
             </Target>
-          </targetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2024-01-05T07:43:07.605265100Z" />
+          </runningDeviceTargetSelectedWithDropDown>
+          <timeTargetWasSelectedWithDropDown value="2024-01-18T10:49:54.813545200Z" />
         </State>
       </entry>
     </value>

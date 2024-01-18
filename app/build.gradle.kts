@@ -16,8 +16,8 @@ android {
         applicationId = "com.mihan.movie.library"
         minSdk = 28
         targetSdk = 34
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -66,17 +66,18 @@ dependencies {
     val retrofit_version = "2.9.0"
     val coil_version = "2.5.0"
     val data_store_version = "1.0.0"
+    val permissions_version = "0.25.1"
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation(platform("androidx.compose:compose-bom:2023.08.00"))
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.tv:tv-foundation:1.0.0-alpha07")
-    implementation("androidx.tv:tv-material:1.0.0-alpha07")
-    implementation("androidx.media3:media3-extractor:1.2.0")
+    implementation("androidx.tv:tv-foundation:1.0.0-alpha07") //пока не трогать, много чего экспериментального
+    implementation("androidx.tv:tv-material:1.0.0-alpha07") //пока не трогать, много чего экспериментального
+    implementation("androidx.media3:media3-extractor:1.2.1")
     implementation("androidx.compose.material3:material3:1.1.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
 
     //DI
@@ -101,6 +102,9 @@ dependencies {
 
     //DataStore
     implementation("androidx.datastore:datastore-preferences:$data_store_version")
+
+    //Checking permissions
+    implementation ("com.google.accompanist:accompanist-permissions:$permissions_version")
 
     //Tests
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
