@@ -125,7 +125,7 @@ private fun Content(
                     state = state,
                     columns = TvGridCells.Fixed(NUMBER_OF_GRID_CELLS),
                     modifier = modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .focusRequester(focusRequester)
                 ) {
                     items(screenState.listOfVideo) { item ->

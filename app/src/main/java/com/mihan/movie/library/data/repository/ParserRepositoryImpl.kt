@@ -5,6 +5,7 @@ import android.util.Base64
 import com.mihan.movie.library.common.Constants.BASE_URL
 import com.mihan.movie.library.common.entites.Filter
 import com.mihan.movie.library.common.entites.VideoCategory
+import com.mihan.movie.library.common.extentions.logger
 import com.mihan.movie.library.data.models.StreamDto
 import com.mihan.movie.library.data.models.VideoDetailDto
 import com.mihan.movie.library.data.models.VideoDto
@@ -17,6 +18,7 @@ import org.json.JSONObject
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 import javax.inject.Inject
 
 @ActivityRetainedScoped
@@ -127,8 +129,17 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
             }
             mapOfTraslations[name] = translatorId
         }
-        if (mapOfTraslations.isEmpty())
-            mapOfTraslations[RUSSIAN_TRANSLATOR_NAME] = RUSSIAN_TRANSLATOR_ID
+        if (mapOfTraslations.isEmpty()) {
+            val translator = document
+                .select("script")
+                .map(Element::data)
+                .first { "initCDNSeriesEvents" in it }
+                .split(",")
+                .map(String::trim)
+                .take(2)
+                .last()
+            mapOfTraslations[RUSSIAN_TRANSLATOR_NAME] = translator
+        }
         return mapOfTraslations.toMap()
     }
 
@@ -270,6 +281,7 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
         val parsedStreams = mutableListOf<StreamDto>()
         if (!streams.isNullOrEmpty()) {
             val decodedStreams = decodeUrl(streams)
+            logger("decoded $decodedStreams")
             val split: Array<String> = decodedStreams.split(",").toTypedArray()
             for (str in split) {
                 try {
@@ -310,10 +322,15 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
                 val jsonObject = JSONObject(bodyString)
                 if (jsonObject.getBoolean("success")) {
                     map.putAll(parseSeasons(Jsoup.parse(jsonObject.getString("episodes"))))
+                } else {
+                    return@forEach
                 }
             } else {
                 error("result is null")
             }
+        }
+        if (map.isEmpty()) {
+            error("Не удалось найти выбранную озвучку")
         }
         return map.toMap()
     }
@@ -360,7 +377,6 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
         private const val APP_HEADER = "X-App-Hdrezka-App"
         private const val GET_STREAM_POST = "/ajax/get_cdn_series"
         private const val RUSSIAN_TRANSLATOR_NAME = "Оригинальный"
-        private const val RUSSIAN_TRANSLATOR_ID = "110"
         private const val SEARCH_URL = "/search/?do=search&subaction=search"
     }
 }
