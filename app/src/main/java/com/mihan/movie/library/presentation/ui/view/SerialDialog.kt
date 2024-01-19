@@ -39,6 +39,7 @@ import androidx.tv.foundation.lazy.list.items
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import com.mihan.movie.library.R
+import com.mihan.movie.library.domain.models.SeasonModel
 import com.mihan.movie.library.presentation.ui.size10dp
 import com.mihan.movie.library.presentation.ui.size14sp
 import com.mihan.movie.library.presentation.ui.size16dp
@@ -52,7 +53,7 @@ private const val DIALOG_RATIO = 2 / 1.5f
 fun SerialDialog(
     isDialogShow: State<Boolean>,
     translations: Map<String, String>,
-    seasons: Map<String, List<String>>,
+    seasons: List<SeasonModel>,
     onTranslationItemClicked: (String) -> Unit,
     onEpisodeClicked: (String, String) -> Unit,
     onDialogDismiss: () -> Unit,
@@ -131,7 +132,7 @@ private fun ExpandableTranslationList(
 
 @Composable
 private fun ExpandableSeasonList(
-    sections: Map<String, List<String>>,
+    sections: List<SeasonModel>,
     onEpisodeClicked: (String, String) -> Unit
 ) {
     val isExpandedMap = remember { List(sections.size) { index: Int -> index to false }.toMutableStateMap() }
@@ -139,13 +140,13 @@ private fun ExpandableSeasonList(
         content = {
             sections.onEachIndexed { index, value ->
                 section(
-                    header = value.key,
-                    listData = value.value,
+                    header = value.season,
+                    listData = value.episodes,
                     isExpanded = isExpandedMap[index] ?: true,
                     onHeaderClick = {
                         isExpandedMap[index] = !(isExpandedMap[index] ?: true)
                     },
-                    onEpisodeClicked = { onEpisodeClicked(value.key, it) }
+                    onEpisodeClicked = { onEpisodeClicked(value.season, it) }
                 )
             }
         }

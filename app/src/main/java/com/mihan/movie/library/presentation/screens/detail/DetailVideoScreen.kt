@@ -61,9 +61,8 @@ fun DetailVideoScreen(
     val screenState by detailViewModel.screenState.collectAsStateWithLifecycle()
     val filmDialogState = detailViewModel.showFilmDialog.collectAsStateWithLifecycle()
     val serialDialogState = detailViewModel.showSerialDialog.collectAsStateWithLifecycle()
-    val movieStreamsState by detailViewModel.listofStreams.collectAsStateWithLifecycle()
     val dataState by detailViewModel.videoData.collectAsStateWithLifecycle()
-    val context = LocalContext.current
+    val listOfSeasons by detailViewModel.listOfSeasons.collectAsStateWithLifecycle()
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -78,9 +77,6 @@ fun DetailVideoScreen(
                 onButtonWatchClick = { detailViewModel.getTranslations() }
             )
         }
-        movieStreamsState?.let { list ->
-            detailViewModel.sendIntent(list, context)
-        }
         FilmDialog(
             isDialogShow = filmDialogState,
             translations = dataState.translations,
@@ -93,7 +89,7 @@ fun DetailVideoScreen(
         SerialDialog(
             isDialogShow = serialDialogState,
             translations = dataState.translations,
-            seasons = dataState.seasonList,
+            seasons = listOfSeasons,
             onTranslationItemClicked = { translate ->
                 val translatorId = dataState.translations.getValue(translate)
                 detailViewModel.selectedTranslatorId(translatorId)

@@ -8,5 +8,4 @@ data class VideoModel(
     val isVideoHasSeries: Boolean = false,
     val translations: Map<String, String> = emptyMap(),
     val videoStreamsWithTranslatorName: Map<String, List<StreamModel>> = emptyMap(),
-    val seasonList: Map<String, List<String>> = emptyMap()
 )

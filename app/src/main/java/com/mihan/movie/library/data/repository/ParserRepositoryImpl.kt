@@ -2,10 +2,11 @@ package com.mihan.movie.library.data.repository
 
 import android.util.ArrayMap
 import android.util.Base64
+import com.mihan.movie.library.common.Constants
 import com.mihan.movie.library.common.Constants.BASE_URL
 import com.mihan.movie.library.common.entites.Filter
 import com.mihan.movie.library.common.entites.VideoCategory
-import com.mihan.movie.library.common.extentions.logger
+import com.mihan.movie.library.data.models.SeasonModelDto
 import com.mihan.movie.library.data.models.StreamDto
 import com.mihan.movie.library.data.models.VideoDetailDto
 import com.mihan.movie.library.data.models.VideoDto
@@ -23,6 +24,8 @@ import javax.inject.Inject
 
 @ActivityRetainedScoped
 class ParserRepositoryImpl @Inject constructor() : ParserRepository {
+
+    private var filmId: String? = null
 
     /**
      * Кэшируем список фильмов после первой загрузки, чтобы при каждом обращении не качать его снова.
@@ -133,7 +136,7 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
             val translator = document
                 .select("script")
                 .map(Element::data)
-                .first { "initCDNSeriesEvents" in it }
+                .first { "sof.tv" in it }
                 .split(",")
                 .map(String::trim)
                 .take(2)
@@ -145,22 +148,20 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
 
     override suspend fun getTranslationsByUrl(url: String): VideoDto = withContext(Dispatchers.IO) {
         val document = getConnection(url).get()
-        val filmId = document.select("div.b-userset__fav_holder").attr("data-post_id")
+        filmId = document.select("div.b-userset__fav_holder").attr("data-post_id")
         val isVideoHasTranslation = document.select("div.b-translators__block").hasText()
-        val translations = getTranslations(document)
         val isVideoHasSeries = document.select("ul.b-simple_seasons__list").hasText()
+        val translations = getTranslations(document)
         VideoDto(
-            videoId = filmId,
+            videoId = filmId ?: Constants.EMPTY_STRING,
             isVideoHasTranslations = isVideoHasTranslation,
             isVideoHasSeries = isVideoHasSeries,
             translations = translations,
-            videoStreamsWithTranslatorName = getStreamsByUrl(
-                document,
-                isVideoHasTranslation,
-                translations,
-                isVideoHasSeries
-            ),
-            seasonList = getSeasons(filmId, translations)
+            videoStreamsWithTranslatorName =
+            if (isVideoHasSeries)
+                emptyMap()
+            else
+                getStreamsByUrl(document, isVideoHasTranslation, translations, false),
         )
     }
 
@@ -218,6 +219,29 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
         list.toList()
     }
 
+    override suspend fun getSeasonsByTranslatorId(translatorId: String): List<SeasonModelDto> = withContext(Dispatchers.IO) {
+        val list = mutableListOf<SeasonModelDto>()
+        val data: ArrayMap<String, String> = ArrayMap()
+        data["id"] = filmId
+        data["translator_id"] = translatorId
+        data["action"] = "get_episodes"
+        val unixTime = System.currentTimeMillis()
+        val result: Document? = getConnection("$BASE_URL$GET_STREAM_POST/?t=$unixTime").data(data).post()
+        if (result != null) {
+            val bodyString: String = result.select("body").text()
+            val jsonObject = JSONObject(bodyString)
+            if (jsonObject.getBoolean("success")) {
+                val map = parseSeasons(Jsoup.parse(jsonObject.getString("episodes")))
+                map.entries.forEach {
+                    list.add(SeasonModelDto(it.key, it.value))
+                }
+            }
+        } else {
+            error("result is null")
+        }
+        list.toList()
+    }
+
     private suspend fun getStreamsByUrl(
         document: Document,
         isVideoHasTranslation: Boolean,
@@ -226,12 +250,13 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
     ): Map<String, List<StreamDto>> = withContext(Dispatchers.IO) {
         val mapOfVideos = mutableMapOf<String, List<StreamDto>>()
         val listOfStreams = mutableListOf<StreamDto>()
-        val filmId = document.select("div.b-userset__fav_holder").attr("data-post_id")
         if (isVideoHasTranslation) {
             translators.entries.forEach { entry ->
-                val translations = getStreamsByTranslationId(filmId, entry.value)
-                if (translations.isNotEmpty())
-                    mapOfVideos[entry.key] = translations
+                filmId?.let { id ->
+                    val translations = getStreamsByTranslationId(id, entry.value)
+                    if (translations.isNotEmpty())
+                        mapOfVideos[entry.key] = translations
+                }
             }
         } else {
             if (isVideoHasSeries) {
@@ -281,7 +306,6 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
         val parsedStreams = mutableListOf<StreamDto>()
         if (!streams.isNullOrEmpty()) {
             val decodedStreams = decodeUrl(streams)
-            logger("decoded $decodedStreams")
             val split: Array<String> = decodedStreams.split(",").toTypedArray()
             for (str in split) {
                 try {
@@ -306,33 +330,6 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository {
             }
         }
         return parsedStreams
-    }
-
-    private fun getSeasons(filmId: String, translators: Map<String, String>): Map<String, List<String>> {
-        val map = mutableMapOf<String, List<String>>()
-        translators.values.forEach { translatorId ->
-            val data: ArrayMap<String, String> = ArrayMap()
-            data["id"] = filmId
-            data["translator_id"] = translatorId
-            data["action"] = "get_episodes"
-            val unixTime = System.currentTimeMillis()
-            val result: Document? = getConnection("$BASE_URL$GET_STREAM_POST/?t=$unixTime").data(data).post()
-            if (result != null) {
-                val bodyString: String = result.select("body").text()
-                val jsonObject = JSONObject(bodyString)
-                if (jsonObject.getBoolean("success")) {
-                    map.putAll(parseSeasons(Jsoup.parse(jsonObject.getString("episodes"))))
-                } else {
-                    return@forEach
-                }
-            } else {
-                error("result is null")
-            }
-        }
-        if (map.isEmpty()) {
-            error("Не удалось найти выбранную озвучку")
-        }
-        return map.toMap()
     }
 
     private fun parseSeasons(document: Document): Map<String, List<String>> {
