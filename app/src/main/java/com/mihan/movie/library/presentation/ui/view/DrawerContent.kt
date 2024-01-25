@@ -48,7 +48,7 @@ enum class DrawerItems(val route: String, val icon: ImageVector, @DrawableRes va
     Updates(Screens.AppUpdatesScreen.route, Icons.Rounded.Notifications, R.string.updates_route_title),
     Search(Screens.Search.route, Icons.Rounded.Search, R.string.search_route_title),
     Home(Screens.Home.route, Icons.Rounded.Home, R.string.home_route_title),
-    Settings(Screens.Placeholder.route, Icons.Rounded.Settings, R.string.settings_route_title)
+    Settings(Screens.Settings.route, Icons.Rounded.Settings, R.string.settings_route_title)
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)

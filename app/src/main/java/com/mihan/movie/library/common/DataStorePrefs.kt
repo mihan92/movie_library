@@ -5,7 +5,10 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.mihan.movie.library.common.entites.VideoCategory
+import com.mihan.movie.library.common.entites.VideoQuality
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -26,8 +29,44 @@ class DataStorePrefs @Inject constructor(@ApplicationContext context: Context) {
             prefs[APP_UPDATES_KEY] = isUpdateAvailable
         }
 
+    fun getVideoCategory(): Flow<VideoCategory> =
+        dataStore.data.map { prefs ->
+            prefs[VIDEO_CATEGORY_KEY]?.let { VideoCategory.valueOf(it) } ?: DEFAULT_VIDEO_CATEGORY
+        }
+
+    suspend fun setVideoCategory(videoCategory: VideoCategory) =
+        dataStore.edit { prefs ->
+            prefs[VIDEO_CATEGORY_KEY] = videoCategory.name
+        }
+
+    fun getVideoQuality(): Flow<VideoQuality> =
+        dataStore.data.map { prefs ->
+            prefs[VIDEO_QUALITY_KEY]?.let { VideoQuality.valueOf(it) } ?: DEFAULT_VIDEO_QUALITY
+        }
+
+    suspend fun setVideoQuality(videoQuality: VideoQuality) =
+        dataStore.edit { prefs ->
+            prefs[VIDEO_QUALITY_KEY] = videoQuality.name
+        }
+
+    fun getBaseUrl(): Flow<String> =
+        dataStore.data.map { prefs ->
+            prefs[BASE_URL_KEY] ?: DEFAULT_BASE_URL
+        }
+
+    suspend fun setBaseUrl(baseUrl: String) =
+        dataStore.edit { prefs ->
+            prefs[BASE_URL_KEY] = baseUrl
+        }
+
     companion object {
         private const val DATA_STORE_NAME = "data_store_preferences"
         private val APP_UPDATES_KEY = booleanPreferencesKey("app_updates_key")
+        private val VIDEO_CATEGORY_KEY = stringPreferencesKey("video_category")
+        private val VIDEO_QUALITY_KEY = stringPreferencesKey("video_quality")
+        private val BASE_URL_KEY = stringPreferencesKey("base_url")
+        private val DEFAULT_VIDEO_CATEGORY = VideoCategory.All
+        private val DEFAULT_VIDEO_QUALITY = VideoQuality.Quality720
+        private const val DEFAULT_BASE_URL = "https://hdrezka320wyi.org"
     }
 }

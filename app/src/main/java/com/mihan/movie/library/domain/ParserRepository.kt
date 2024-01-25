@@ -4,13 +4,12 @@ import com.mihan.movie.library.common.entites.Filter
 import com.mihan.movie.library.common.entites.VideoCategory
 import com.mihan.movie.library.data.models.SeasonModelDto
 import com.mihan.movie.library.data.models.StreamDto
-import com.mihan.movie.library.data.models.VideoDto
 import com.mihan.movie.library.data.models.VideoDetailDto
+import com.mihan.movie.library.data.models.VideoDto
 import com.mihan.movie.library.data.models.VideoItemDto
-import com.mihan.movie.library.domain.models.SeasonModel
 
 interface ParserRepository {
-    suspend fun getListVideo(filter: Filter, videoCategory: VideoCategory, page: Int): List<VideoItemDto>
+    suspend fun getListVideo(filter: Filter, videoCategory: VideoCategory, page: Int, baseUrl: String): List<VideoItemDto>
 
     suspend fun getDetailVideoByUrl(url: String): VideoDetailDto
 

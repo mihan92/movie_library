@@ -27,4 +27,14 @@
     <string name="hint_enter_query">Введите название</string>
     <string name="hint_no_results">По вашему запросу ничего не найдено</string>
     <string name="toast_confirm_exit">Нажмите ещё раз для выхода</string>
+    <string name="category_title">Категория</string>
+    <string name="category_description">Выберите подходящую для себя категорию видео. По умолчанию выбраны все катеории</string>
+    <string name="quality_title">Качество</string>
+    <string name="quality_description">По умолчанию установлено среднее качество видео. Если установленное качество не будет найдено, то будет установлено максимально доступное качество для этого видео</string>
+    <string name="app_version_title">Версия %\s</string>
+    <string name="site_url_title">Ссылка на сайт</string>
+    <string name="site_url_description">Текущая ссылка на сайт. При изменении не указывайте слеш в конце ссылки</string>
+    <string name="change_title">Изменить</string>
+    <string name="confirm_title">Применить</string>
+    <string name="dismiss_title">Отменить</string>
 </resources>

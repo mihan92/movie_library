@@ -15,11 +15,12 @@ class GetListVideoUseCase @Inject constructor(private val parserRepository: Pars
     suspend operator fun invoke(
         filter: Filter,
         videoCategory: VideoCategory,
-        page: Int
+        page: Int,
+        baseUrl: String
     ): Flow<DtoState<List<VideoItemModel>>> = flow {
         try {
             emit(DtoState.Loading())
-            val listOfMovies = parserRepository.getListVideo(filter, videoCategory, page).map { it.toVideoItemModel() }
+            val listOfMovies = parserRepository.getListVideo(filter, videoCategory, page, baseUrl).map { it.toVideoItemModel() }
             emit(DtoState.Success(listOfMovies))
         } catch (e: Exception) {
             logger(e.message.toString())

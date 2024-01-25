@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 val sizeEmpty = 0.dp
+val size1dp = 1.dp
 val size2dp = 2.dp
 val size4dp = 4.dp
 val size6dp = 6.dp
@@ -22,4 +23,5 @@ val size300dp = 300.dp
 val size14sp = 14.sp
 val size16sp = 16.sp
 val size18sp = 18.sp
+val size24sp = 24.sp
 val size32sp = 32.sp

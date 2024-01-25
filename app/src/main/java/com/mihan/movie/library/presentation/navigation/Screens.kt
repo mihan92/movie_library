@@ -7,7 +7,6 @@ enum class Screens(val route: String) {
     Settings("settings_screen"),
     DetailMovieScreen("detail_screen"),
     AppUpdatesScreen("app_updates_screen"),
-    Placeholder("placeholder_screen")
 }
 
 

@@ -41,7 +41,7 @@ class DownloadManagerImpl @Inject constructor(
     }
 
     override fun downloadApk(url: String): Long {
-        val filename = url.substringAfterLast("/")
+        val filename = Constants.DOWNLOADED_FILE_NAME
         downloadedFilePath = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), filename)
         deleteOldApk()
         val request = DownloadManager.Request(url.toUri())

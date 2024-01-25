@@ -8,7 +8,7 @@ data class VideoDto(
     val isVideoHasTranslations: Boolean = false,
     val isVideoHasSeries: Boolean = false,
     val translations: Map<String, String> = emptyMap(),
-    val videoStreamsWithTranslatorName: Map<String, List<StreamDto>> = emptyMap(),
+    val videoTranslationsWithoutSeries: Map<String, List<StreamDto>> = emptyMap(),
 )
 
 fun List<StreamDto>.toListStreamModel() = map(StreamDto::toStreamModel)
@@ -18,5 +18,5 @@ fun VideoDto.toVideoModel() = VideoModel(
     isVideoHasTranslations = isVideoHasTranslations,
     isVideoHasSeries = isVideoHasSeries,
     translations = translations,
-    videoStreamsWithTranslatorName = videoStreamsWithTranslatorName.mapValues { it.value.toListStreamModel() },
+    videoStreamsWithTranslatorName = videoTranslationsWithoutSeries.mapValues { it.value.toListStreamModel() },
 )

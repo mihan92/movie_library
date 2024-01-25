@@ -7,7 +7,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.mihan.movie.library.common.Constants.EMPTY_STRING
+import com.mihan.movie.library.common.DataStorePrefs
 import com.mihan.movie.library.common.DtoState
+import com.mihan.movie.library.common.utils.whileUiSubscribed
 import com.mihan.movie.library.domain.models.SeasonModel
 import com.mihan.movie.library.domain.models.StreamModel
 import com.mihan.movie.library.domain.models.VideoModel
@@ -19,9 +21,11 @@ import com.mihan.movie.library.presentation.screens.navArgs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,6 +36,7 @@ class DetailViewModel @Inject constructor(
     private val getTranslationsByUrlUseCase: GetTranslationsByUrlUseCase,
     private val getStreamsBySeasonIdUseCase: GetStreamsBySeasonIdUseCase,
     private val getSeasonsByTranslatorIdUseCase: GetSeasonsByTranslatorIdUseCase,
+    dataStorePrefs: DataStorePrefs,
     savedStateHandle: SavedStateHandle,
     application: Application
 ) : AndroidViewModel(application) {
@@ -44,6 +49,7 @@ class DetailViewModel @Inject constructor(
     private var _translatorId = _videoData.value.translations.values.firstOrNull()
     private val _listOfSeasons = MutableStateFlow<List<SeasonModel>>(emptyList())
     private var _seasonAndEpisodeTitle = Pair(EMPTY_STRING, EMPTY_STRING)
+    private val _videoQuality = dataStorePrefs.getVideoQuality().shareIn(viewModelScope, whileUiSubscribed, 1)
 
     val videoData = _videoData.asStateFlow()
     val showFilmDialog = _showFilmDialog.asStateFlow()
@@ -134,28 +140,30 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun sendIntent(selectedStream: List<StreamModel>) {
-        try {
-            val context = getApplication<Application>().applicationContext
-            val maxQuality = selectedStream.last()
-            val videoPath = maxQuality.url
-            val title =
-                if (!_videoData.value.isVideoHasSeries) screenState.value.detailInfo?.title
-                else
-                    "${screenState.value.detailInfo?.title}" +
-                            "  /  ${_seasonAndEpisodeTitle.first} сезон" +
-                            "  ${_seasonAndEpisodeTitle.second} серия"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoPath)).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                setDataAndType(Uri.parse(videoPath), "video/*")
-                putExtra("title", title)
+        viewModelScope.launch {
+            try {
+                val context = getApplication<Application>().applicationContext
+                val videoStream =
+                    selectedStream.firstOrNull { it.quality == _videoQuality.first().quality } ?: selectedStream.last()
+                val videoPath = videoStream.url
+                var title = screenState.value.detailInfo?.title
+                val seasonsTitle =
+                    "  /  ${_seasonAndEpisodeTitle.first} сезон" + "  ${_seasonAndEpisodeTitle.second} серия"
+                if (videoData.value.isVideoHasSeries) title += seasonsTitle
+                title += "  (${videoStream.quality})"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoPath)).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    setDataAndType(Uri.parse(videoPath), "video/*")
+                    putExtra("title", title)
+                }
+                context.startActivity(intent)
+                _listOfStreams.update { emptyList() }
+            } catch (e: Exception) {
+                _screenState.value = DetailScreenState(
+                    detailInfo = _screenState.value.detailInfo,
+                    errorMessage = e.message.toString()
+                )
             }
-            context.startActivity(intent)
-            _listOfStreams.update { emptyList() }
-        } catch (e: Exception) {
-            _screenState.value = DetailScreenState(
-                detailInfo = _screenState.value.detailInfo,
-                errorMessage = e.message.toString()
-            )
         }
     }
 
