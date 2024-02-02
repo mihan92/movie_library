@@ -16,8 +16,8 @@ android {
         applicationId = "com.mihan.movie.library"
         minSdk = 28
         targetSdk = 34
-        versionCode = 7
-        versionName = "0.4.1"
+        versionCode = 8
+        versionName = "0.5.0"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -61,12 +61,12 @@ kapt {
 
 dependencies {
 
-    val hilt_version = "2.50"
-    val navigation_version = "1.9.55"
-    val retrofit_version = "2.9.0"
-    val coil_version = "2.5.0"
-    val data_store_version = "1.0.0"
-    val permissions_version = "0.25.1"
+    val hiltVersion = "2.50"
+    val navigationVersion = "1.9.55"
+    val retrofitVersion = "2.9.0"
+    val coilVersion = "2.5.0"
+    val dataStoreVersion = "1.0.0"
+    val permissionsVersion = "0.25.1"
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -81,30 +81,30 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.8.2")
 
     //DI
-    implementation("com.google.dagger:hilt-android:$hilt_version")
-    kapt ("com.google.dagger:hilt-compiler:$hilt_version")
+    implementation("com.google.dagger:hilt-android:$hiltVersion")
+    kapt ("com.google.dagger:hilt-compiler:$hiltVersion")
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
     //Navigation
-    implementation("io.github.raamcosta.compose-destinations:animations-core:$navigation_version")
-    ksp("io.github.raamcosta.compose-destinations:ksp:$navigation_version")
+    implementation("io.github.raamcosta.compose-destinations:animations-core:$navigationVersion")
+    ksp("io.github.raamcosta.compose-destinations:ksp:$navigationVersion")
 
     //Retrofit
-    implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
-    implementation("com.squareup.retrofit2:converter-gson:$retrofit_version")
+    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
+    implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     //Jsoup
     implementation ("org.jsoup:jsoup:1.17.1")
 
     //Load Images
-    implementation("io.coil-kt:coil-compose:$coil_version")
+    implementation("io.coil-kt:coil-compose:$coilVersion")
 
     //DataStore
-    implementation("androidx.datastore:datastore-preferences:$data_store_version")
+    implementation("androidx.datastore:datastore-preferences:$dataStoreVersion")
 
     //Checking permissions
-    implementation ("com.google.accompanist:accompanist-permissions:$permissions_version")
+    implementation ("com.google.accompanist:accompanist-permissions:$permissionsVersion")
 
     //Tests
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))

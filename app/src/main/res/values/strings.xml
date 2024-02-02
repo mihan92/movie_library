@@ -43,4 +43,6 @@
     <string name="release_date_title">Дата выхода: %\s</string>
     <string name="country_title">Страна: %\s</string>
     <string name="genre_title">Жанр: %\s</string>
+    <string name="primary_color_title">Основной цвет</string>
+    <string name="primary_color_description">Выберите основной цвет приложения на своё усмотрение</string>
 </resources>

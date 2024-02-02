@@ -271,7 +271,11 @@ private fun ButtonsSection(
                     .padding(start = size28dp)
                     .focusRequester(focusRequester)
             ) {
-                Text(text = stringResource(id = R.string.bt_watch))
+                Text(
+                    text = stringResource(id = R.string.bt_watch).uppercase(),
+                    fontWeight = FontWeight.W700,
+                    color = MaterialTheme.colorScheme.background
+                )
             }
         }
         LaunchedEffect(key1 = Unit) {

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mihan.movie.library.common.Constants
 import com.mihan.movie.library.common.DataStorePrefs
+import com.mihan.movie.library.common.entites.Colors
 import com.mihan.movie.library.common.entites.VideoCategory
 import com.mihan.movie.library.common.entites.VideoQuality
 import com.mihan.movie.library.common.utils.whileUiSubscribed
@@ -39,6 +40,12 @@ class SettingsViewModel @Inject constructor(
         Constants.EMPTY_STRING
     )
 
+    val getPrimaryColor = dataStorePrefs.getPrimaryColor().stateIn(
+        viewModelScope,
+        whileUiSubscribed,
+        Colors.Color0
+    )
+
     fun videoCategoryChanged(videoCategory: VideoCategory) {
         viewModelScope.launch {
             dataStorePrefs.setVideoCategory(videoCategory)
@@ -48,6 +55,12 @@ class SettingsViewModel @Inject constructor(
     fun videoQualityChanged(videoQuality: VideoQuality) {
         viewModelScope.launch {
             dataStorePrefs.setVideoQuality(videoQuality)
+        }
+    }
+
+    fun primaryColorChanged(selectedColor: Colors) {
+        viewModelScope.launch {
+            dataStorePrefs.setPrimaryColor(selectedColor)
         }
     }
 

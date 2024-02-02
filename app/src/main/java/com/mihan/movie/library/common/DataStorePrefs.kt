@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.mihan.movie.library.common.entites.Colors
 import com.mihan.movie.library.common.entites.VideoCategory
 import com.mihan.movie.library.common.entites.VideoQuality
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -59,14 +60,27 @@ class DataStorePrefs @Inject constructor(@ApplicationContext context: Context) {
             prefs[BASE_URL_KEY] = baseUrl
         }
 
+    fun getPrimaryColor(): Flow<Colors> =
+        dataStore.data.map { prefs ->
+            prefs[PRIMARY_COLOR_KEY]?.let { Colors.valueOf(it) } ?: DEFAULT_PRIMARY_COLOR
+        }
+
+    suspend fun setPrimaryColor(primaryColor: Colors) {
+        dataStore.edit { prefs ->
+            prefs[PRIMARY_COLOR_KEY] = primaryColor.name
+        }
+    }
+
     companion object {
         private const val DATA_STORE_NAME = "data_store_preferences"
         private val APP_UPDATES_KEY = booleanPreferencesKey("app_updates_key")
         private val VIDEO_CATEGORY_KEY = stringPreferencesKey("video_category")
         private val VIDEO_QUALITY_KEY = stringPreferencesKey("video_quality")
         private val BASE_URL_KEY = stringPreferencesKey("base_url")
+        private val PRIMARY_COLOR_KEY = stringPreferencesKey("primary_color")
         private val DEFAULT_VIDEO_CATEGORY = VideoCategory.All
         private val DEFAULT_VIDEO_QUALITY = VideoQuality.Quality720
+        private val DEFAULT_PRIMARY_COLOR = Colors.Color0
         private const val DEFAULT_BASE_URL = "https://hdrezka320wyi.org"
     }
 }

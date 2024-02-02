@@ -1,7 +1,7 @@
 package com.mihan.movie.library.presentation.screens.settings
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,15 +29,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.tv.material3.Border
+import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults.colors
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.OutlinedButton
-import androidx.tv.material3.OutlinedButtonDefaults
 import androidx.tv.material3.Text
 import com.mihan.movie.library.BuildConfig
 import com.mihan.movie.library.R
+import com.mihan.movie.library.common.entites.Colors
 import com.mihan.movie.library.common.entites.VideoCategory
 import com.mihan.movie.library.common.entites.VideoQuality
 import com.mihan.movie.library.presentation.animation.AnimatedScreenTransitions
@@ -46,6 +46,7 @@ import com.mihan.movie.library.presentation.ui.size16dp
 import com.mihan.movie.library.presentation.ui.size1dp
 import com.mihan.movie.library.presentation.ui.size20sp
 import com.mihan.movie.library.presentation.ui.view.ChangingSiteUrlDialog
+import com.mihan.movie.library.presentation.ui.view.PrimaryColorDropDownMenu
 import com.mihan.movie.library.presentation.ui.view.VideoCategoryDropDownMenu
 import com.mihan.movie.library.presentation.ui.view.VideoQualityDropDownMenu
 import com.ramcosta.composedestinations.annotation.Destination
@@ -64,6 +65,7 @@ fun SettingsScreen(
     val videoQuality by settingsViewModel.getVideoQuality.collectAsStateWithLifecycle()
     val siteUrl by settingsViewModel.getSiteUrl.collectAsStateWithLifecycle()
     val siteDialogState by settingsViewModel.siteDialogState.collectAsStateWithLifecycle()
+    val primaryColor by settingsViewModel.getPrimaryColor.collectAsStateWithLifecycle()
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
@@ -83,6 +85,10 @@ fun SettingsScreen(
             VideoQuality(
                 videoQuality = videoQuality,
                 onQualityItemClicked = settingsViewModel::videoQualityChanged
+            )
+            PrimaryColor(
+                primaryColor = primaryColor,
+                onColorItemClicked = settingsViewModel::primaryColorChanged
             )
             SiteUrl(onButtonClick = settingsViewModel::onButtonShowDialogClicked)
         }
@@ -178,19 +184,50 @@ private fun SiteUrl(
         verticalAlignment = Alignment.CenterVertically
     ) {
         TitleWithDescription(titleResId = R.string.site_url_title, descResiId = R.string.site_url_description)
-        OutlinedButton(
+        Button(
             onClick = onButtonClick,
-            modifier = modifier.onFocusChanged { isFocused = it.isFocused },
+            modifier = modifier
+                .onFocusChanged { isFocused = it.isFocused }
+                .border(size1dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(size10dp)),
             colors = colors(
                 focusedContainerColor = MaterialTheme.colorScheme.background,
                 containerColor = MaterialTheme.colorScheme.background,
                 contentColor = MaterialTheme.colorScheme.onBackground,
                 focusedContentColor = MaterialTheme.colorScheme.onBackground
             ),
-            border = OutlinedButtonDefaults.border(Border(BorderStroke(size1dp, MaterialTheme.colorScheme.primary))),
         ) {
-            Text(text = stringResource(id = R.string.change_title))
+            Text(text = stringResource(id = R.string.change_title).uppercase())
         }
+    }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun PrimaryColor(
+    primaryColor: Colors,
+    onColorItemClicked: (Colors) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    val backgroundColor = if (isFocused) MaterialTheme.colorScheme.onBackground.copy(SELECTED_BACKGROUND_ALPHA)
+    else MaterialTheme.colorScheme.background
+    Row(
+        modifier = modifier
+            .background(backgroundColor)
+            .padding(vertical = size10dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TitleWithDescription(
+            titleResId = R.string.primary_color_title,
+            descResiId = R.string.primary_color_description,
+        )
+        PrimaryColorDropDownMenu(
+            primaryColor = primaryColor,
+            onColorItemClicked = onColorItemClicked,
+            isFocused = { isFocused = it }
+        )
     }
 }
 

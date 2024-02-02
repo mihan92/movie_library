@@ -37,7 +37,6 @@ import com.mihan.movie.library.presentation.ui.size2dp
 import com.mihan.movie.library.presentation.ui.size4dp
 import com.mihan.movie.library.presentation.ui.size6dp
 import com.mihan.movie.library.presentation.ui.size8dp
-import com.mihan.movie.library.presentation.ui.theme.primaryColor
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTvMaterial3Api::class)
 @Composable
@@ -49,6 +48,7 @@ fun MovieItem(
     modifier: Modifier = Modifier
 ) {
     var borderColor by remember { mutableStateOf(Color.Transparent) }
+    val primaryColor = MaterialTheme.colorScheme.primary
     Card(
         modifier = modifier
             .aspectRatio(2 / 3f)

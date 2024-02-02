@@ -25,6 +25,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.rememberDrawerState
 import com.mihan.movie.library.R
 import com.mihan.movie.library.common.DataStorePrefs
+import com.mihan.movie.library.common.entites.Colors
 import com.mihan.movie.library.common.utils.AppUpdatesChecker
 import com.mihan.movie.library.presentation.navigation.Screens
 import com.mihan.movie.library.presentation.screens.NavGraphs
@@ -52,7 +53,9 @@ class MainActivity : ComponentActivity() {
         appUpdatesChecker.checkUpdates()
         onBackPressedCallback()
         setContent {
-            MovieLibraryTheme {
+            val primaryColorState = dataStorePrefs.getPrimaryColor().collectAsStateWithLifecycle(Colors.Color0)
+            val primaryColor by remember { primaryColorState }
+            MovieLibraryTheme(selectedColor = primaryColor) {
                 val appUpdateState = dataStorePrefs.getAppUpdates().collectAsStateWithLifecycle(initialValue = false)
                 val isAppUpdateAvailable by remember { appUpdateState }
                 val navController by remember { derivedStateOf { this.navController } }
