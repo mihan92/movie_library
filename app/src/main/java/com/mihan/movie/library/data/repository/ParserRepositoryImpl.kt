@@ -3,6 +3,7 @@ package com.mihan.movie.library.data.repository
 import android.util.ArrayMap
 import android.util.Base64
 import com.mihan.movie.library.common.Constants
+import com.mihan.movie.library.common.DataStorePrefs
 import com.mihan.movie.library.common.entites.Filter
 import com.mihan.movie.library.common.entites.VideoCategory
 import com.mihan.movie.library.data.models.SeasonModelDto
@@ -15,20 +16,25 @@ import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import org.jsoup.select.Elements
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 @ActivityRetainedScoped
-class ParserRepositoryImpl @Inject constructor() : ParserRepository, CoroutineScope {
+class ParserRepositoryImpl @Inject constructor(
+    private val dataStorePrefs: DataStorePrefs
+) : ParserRepository, CoroutineScope {
     override val coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.IO
     private var filmId: String? = null
-    private var baseUrl = Constants.EMPTY_STRING
+
+    private suspend fun getBaseUrl() = dataStorePrefs.getBaseUrl().first()
 
     /**
      * Кэшируем список фильмов после первой загрузки, чтобы при каждом обращении не качать его снова.
@@ -45,11 +51,11 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository, CoroutineSc
         .header(APP_HEADER, REQUEST_HEADER_ENABLE_METADATA_VALUE)
         .timeout(CONNECTION_TIMEOUT)
 
-    private fun getUrl(page: Int, section: String, genre: String): String {
+    private suspend fun getUrl(page: Int, section: String, genre: String): String {
         return if (page > 1)
-            "$baseUrl/page/$page/?filter=$section$genre"
+            "${getBaseUrl()}/page/$page/?filter=$section$genre"
         else
-            "$baseUrl/?filter=$section$genre"
+            "${getBaseUrl()}/?filter=$section$genre"
     }
 
     /**
@@ -59,10 +65,8 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository, CoroutineSc
         filter: Filter,
         videoCategory: VideoCategory,
         page: Int,
-        baseUrl: String
     ): List<VideoItemDto> =
         withContext(Dispatchers.IO) {
-            this@ParserRepositoryImpl.baseUrl = baseUrl
             if (currentFilter == filter && currentVideoCategory == videoCategory && currentPage == page) {
                 cashedListVideo.toList()
             } else {
@@ -104,25 +108,47 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository, CoroutineSc
      */
     override suspend fun getDetailVideoByUrl(url: String): VideoDetailDto = withContext(Dispatchers.IO) {
         val document = getConnection(url).get()
+        filmId = document.select("div.b-userset__fav_holder").attr("data-post_id")
         val element = document.select("div.b-post")
         val title = element.select("div.b-post__title").text()
         val desc = element.select("div.b-post__description_text").text()
-        val releaseDate = element.select("tr").eq(3).text()
-        val country = element.select("tr").eq(4).text()
-        val genre = element.select("tr").eq(6).text()
-        val ratingIMdb = element.select("tr").eq(0).text()
-        val ratingHdRezka = element.select("span.num").text() + element.select("span.votes").text()
-        val imageUrl = element.select("img").attr("src")
+        val ratingHdRezka = element.select("span.num").text() + element.select("average").text()
+        val imageUrl = element.select("div.b-sidecover a").attr("href")
+        val table = element.select("table.b-post__info").select("td")
+        val actors = table.last()?.text()?.split(",")?.take(5)?.joinToString()
+
         VideoDetailDto(
+            videoId = filmId ?: Constants.EMPTY_STRING,
             title = title,
             description = desc,
-            releaseDate = releaseDate,
-            country = country,
-            ratingIMdb = ratingIMdb,
+            releaseDate = getTableValueByName(table, "дата выхода"),
+            country = getTableValueByName(table, "страна"),
+            ratingIMDb = getRatingByName(table.text(), "IMDb"),
+            ratingKp = getRatingByName(table.text(), "Кинопоиск"),
             ratingHdrezka = ratingHdRezka,
-            genre = genre,
+            genre = getTableValueByName(table, "жанр"),
+            actors = actors ?: Constants.EMPTY_STRING,
             imageUrl = imageUrl
         )
+    }
+
+    private fun getRatingByName(searshingString: String, searchigText: String): String {
+        var value = ""
+        val index = searshingString.indexOf(searchigText)
+        if (index != -1) {
+            val startIndex = index + searchigText.length + 2
+            value = searshingString.substring(startIndex, startIndex + 3)
+        }
+        return value
+    }
+
+    private fun getTableValueByName(table: Elements, searchigText: String): String {
+        var value = ""
+        table.forEachIndexed { index, elem ->
+            if (elem.text().contains(searchigText, true))
+                value = table[index + 1].text()
+        }
+        return value
     }
 
     /**
@@ -157,7 +183,6 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository, CoroutineSc
 
     override suspend fun getTranslationsByUrl(url: String): VideoDto = withContext(Dispatchers.IO) {
         val document = getConnection(url).get()
-        filmId = document.select("div.b-userset__fav_holder").attr("data-post_id")
         val isVideoHasTranslation = document.select("div.b-translators__block").hasText()
         val isVideoHasSeries = document.select("ul.b-simple_seasons__list").hasText()
         val translations = getTranslations(document)
@@ -188,7 +213,7 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository, CoroutineSc
         data["episode"] = episode
         data["action"] = "get_stream"
         val unixTime = System.currentTimeMillis()
-        val result: Document? = getConnection("$baseUrl$GET_STREAM_POST/?t=$unixTime").data(data).post()
+        val result: Document? = getConnection("${getBaseUrl()}$GET_STREAM_POST/?t=$unixTime").data(data).post()
         if (result != null) {
             val bodyString: String = result.select("body").text()
             val jsonObject = JSONObject(bodyString)
@@ -200,7 +225,7 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository, CoroutineSc
 
     override suspend fun getVideosByTitle(videoTitle: String): List<VideoItemDto> = withContext(Dispatchers.IO) {
         val list = mutableListOf<VideoItemDto>()
-        val document = getConnection(baseUrl + SEARCH_URL).data("q", videoTitle).post()
+        val document = getConnection("${getBaseUrl()}$SEARCH_URL").data("q", videoTitle).post()
         val element = document.select("div.b-content__inline_item")
         for (i in 0 until element.size) {
             val title = element.select("div.b-content__inline_item-link")
@@ -236,7 +261,7 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository, CoroutineSc
             data["translator_id"] = translatorId
             data["action"] = "get_episodes"
             val unixTime = System.currentTimeMillis()
-            val result: Document? = getConnection("$baseUrl$GET_STREAM_POST/?t=$unixTime").data(data).post()
+            val result: Document? = getConnection("${getBaseUrl()}$GET_STREAM_POST/?t=$unixTime").data(data).post()
             if (result != null) {
                 val bodyString: String = result.select("body").text()
                 val jsonObject = JSONObject(bodyString)
@@ -302,7 +327,7 @@ class ParserRepositoryImpl @Inject constructor() : ParserRepository, CoroutineSc
             data["translator_id"] = translatorId
             data["action"] = "get_movie"
             val unixTime = System.currentTimeMillis()
-            val result: Document? = getConnection("$baseUrl$GET_STREAM_POST/?t=$unixTime").data(data).post()
+            val result: Document? = getConnection("${getBaseUrl()}$GET_STREAM_POST/?t=$unixTime").data(data).post()
             if (result != null) {
                 val bodyString: String = result.select("body").text()
                 val jsonObject = JSONObject(bodyString)

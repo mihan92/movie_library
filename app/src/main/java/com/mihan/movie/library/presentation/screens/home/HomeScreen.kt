@@ -50,6 +50,7 @@ fun HomeScreen(
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
     val filterState by viewModel.filterState.collectAsStateWithLifecycle()
     val currentPage by viewModel.pageState.collectAsStateWithLifecycle()
+    val videoCategory by viewModel.videoCategoryState.collectAsStateWithLifecycle()
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             currentFilterSection = filterState,
@@ -74,6 +75,9 @@ fun HomeScreen(
                 )
             }
         }
+    }
+    LaunchedEffect(key1 = currentPage, key2 = filterState, key3 = videoCategory) {
+        viewModel.getListVideo()
     }
 }
 

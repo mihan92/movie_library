@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,22 +39,22 @@ import com.mihan.movie.library.BuildConfig
 import com.mihan.movie.library.R
 import com.mihan.movie.library.common.entites.VideoCategory
 import com.mihan.movie.library.common.entites.VideoQuality
+import com.mihan.movie.library.presentation.animation.AnimatedScreenTransitions
 import com.mihan.movie.library.presentation.ui.size10dp
 import com.mihan.movie.library.presentation.ui.size14sp
+import com.mihan.movie.library.presentation.ui.size16dp
 import com.mihan.movie.library.presentation.ui.size1dp
-import com.mihan.movie.library.presentation.ui.size24sp
-import com.mihan.movie.library.presentation.ui.size28dp
+import com.mihan.movie.library.presentation.ui.size20sp
 import com.mihan.movie.library.presentation.ui.view.ChangingSiteUrlDialog
 import com.mihan.movie.library.presentation.ui.view.VideoCategoryDropDownMenu
 import com.mihan.movie.library.presentation.ui.view.VideoQualityDropDownMenu
 import com.ramcosta.composedestinations.annotation.Destination
 
-private const val DIVIDER_BACKGROUND_ALPHA = 0.2f
-private const val DESCRIPTION_TITLE_ALPHA = 0.5f
+private const val DESCRIPTION_TITLE_ALPHA = 0.6f
 private const val SELECTED_BACKGROUND_ALPHA = 0.1f
 
 @OptIn(ExperimentalTvMaterial3Api::class)
-@Destination
+@Destination(style = AnimatedScreenTransitions::class)
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel()
@@ -72,7 +71,7 @@ fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = size28dp)
+                .padding(vertical = size16dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -81,14 +80,11 @@ fun SettingsScreen(
                 onCategoryItemClicked = settingsViewModel::videoCategoryChanged,
                 modifier = Modifier.focusRequester(focusRequester)
             )
-            Divider(color = MaterialTheme.colorScheme.onBackground.copy(DIVIDER_BACKGROUND_ALPHA))
             VideoQuality(
                 videoQuality = videoQuality,
                 onQualityItemClicked = settingsViewModel::videoQualityChanged
             )
-            Divider(color = MaterialTheme.colorScheme.onBackground.copy(DIVIDER_BACKGROUND_ALPHA))
             SiteUrl(onButtonClick = settingsViewModel::onButtonShowDialogClicked)
-            Divider(color = MaterialTheme.colorScheme.onBackground.copy(DIVIDER_BACKGROUND_ALPHA))
         }
         Text(
             text = stringResource(id = R.string.app_version_title, BuildConfig.VERSION_NAME),
@@ -208,7 +204,7 @@ private fun TitleWithDescription(
     Column(modifier = modifier.fillMaxWidth(0.75f)) {
         Text(
             text = stringResource(id = titleResId),
-            fontSize = size24sp,
+            fontSize = size20sp,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.W600
         )

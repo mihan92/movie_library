@@ -21,8 +21,8 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.Text
 import com.mihan.movie.library.R
 import com.mihan.movie.library.presentation.animation.AnimatedScreenTransitions
-import com.mihan.movie.library.presentation.navigation.Screens
 import com.mihan.movie.library.presentation.navigation.popUpToExit
+import com.mihan.movie.library.presentation.screens.destinations.HomeScreenDestination
 import com.mihan.movie.library.presentation.ui.size100dp
 import com.mihan.movie.library.presentation.ui.size20dp
 import com.mihan.movie.library.presentation.ui.size32sp
@@ -66,7 +66,7 @@ fun SplashScreen(
 }
 
 fun navigateToNextScreen(navigator: DestinationsNavigator) {
-    navigator.navigate(Screens.Home.route) {
+    navigator.navigate(HomeScreenDestination) {
         popUpToExit()
     }
 }

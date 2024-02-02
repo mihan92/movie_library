@@ -4,7 +4,7 @@
     <string name="settings_route_title">Настройки</string>
     <string name="search_route_title">Поиск</string>
     <string name="bt_watch">Смотреть</string>
-    <string name="rating_hdr_title">Рейтинг HdRezka: %\s</string>
+    <string name="rating_rezka">Rezka: %\s</string>
     <string name="current_page_title">Страница %\d</string>
     <string name="filter_last_title">Последние поступления</string>
     <string name="filter_popular_title">Популярные</string>
@@ -28,7 +28,7 @@
     <string name="hint_no_results">По вашему запросу ничего не найдено</string>
     <string name="toast_confirm_exit">Нажмите ещё раз для выхода</string>
     <string name="category_title">Категория</string>
-    <string name="category_description">Выберите подходящую для себя категорию видео. По умолчанию выбраны все катеории</string>
+    <string name="category_description">Выберите подходящую для себя категорию видео. По умолчанию выбраны все категории</string>
     <string name="quality_title">Качество</string>
     <string name="quality_description">По умолчанию установлено среднее качество видео. Если установленное качество не будет найдено, то будет установлено максимально доступное качество для этого видео</string>
     <string name="app_version_title">Версия %\s</string>
@@ -37,4 +37,10 @@
     <string name="change_title">Изменить</string>
     <string name="confirm_title">Применить</string>
     <string name="dismiss_title">Отменить</string>
+    <string name="rating_imdb">IMDb: %\s</string>
+    <string name="rating_kp">Кинопоиск: %\s</string>
+    <string name="ratings_title">Рейтинги:</string>
+    <string name="release_date_title">Дата выхода: %\s</string>
+    <string name="country_title">Страна: %\s</string>
+    <string name="genre_title">Жанр: %\s</string>
 </resources>

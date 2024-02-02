@@ -16,6 +16,8 @@ interface IDownloadManager {
     fun downloadApk(url: String): Long
 
     fun installApk()
+
+    fun deleteOldApk()
 }
 
 @Singleton
@@ -29,7 +31,7 @@ class DownloadManagerImpl @Inject constructor(
     /**
      * Перед загрузкой новой apk старые удаляются из кэша, если таковые имеются
      */
-    private fun deleteOldApk() {
+    override fun deleteOldApk() {
         context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)?.path?.let { path ->
             val downloadsDirectory = File(path)
             if (downloadsDirectory.exists()) {
@@ -43,7 +45,6 @@ class DownloadManagerImpl @Inject constructor(
     override fun downloadApk(url: String): Long {
         val filename = Constants.DOWNLOADED_FILE_NAME
         downloadedFilePath = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), filename)
-        deleteOldApk()
         val request = DownloadManager.Request(url.toUri())
             .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
             .setMimeType(Constants.MIME_TYPE)

@@ -5,13 +5,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.derivedStateOf
@@ -71,24 +66,17 @@ class MainActivity : ComponentActivity() {
                     ModalNavigationDrawer(
                         drawerState = drawerState,
                         drawerContent = {
-                            AnimatedVisibility(
-                                visible = currentDestination in screensWithDrawer,
-                                enter = slideInHorizontally(
-                                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-                                ) + fadeIn(),
-                                exit = slideOutHorizontally(
-                                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-                                ) + fadeOut()
-                            ) {
+                            if (currentDestination in screensWithDrawer)
                                 DrawerContent(
                                     drawerState = drawerState,
                                     currentDestination = currentDestination,
                                     isAppUpdatesAvailable = isAppUpdateAvailable,
                                     navController = navController
                                 )
-                            }
                         },
-                        modifier = Modifier.background(MaterialTheme.colorScheme.background),
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.background)
+                            .animateContentSize(tween()),
                     ) {
                         DestinationsNavHost(
                             navGraph = NavGraphs.root,

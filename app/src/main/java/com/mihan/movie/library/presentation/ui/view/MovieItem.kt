@@ -1,15 +1,12 @@
 package com.mihan.movie.library.presentation.ui.view
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -36,7 +33,6 @@ import coil.compose.SubcomposeAsyncImage
 import com.mihan.movie.library.common.entites.VideoCategory
 import com.mihan.movie.library.presentation.ui.size10dp
 import com.mihan.movie.library.presentation.ui.size16sp
-import com.mihan.movie.library.presentation.ui.size28dp
 import com.mihan.movie.library.presentation.ui.size2dp
 import com.mihan.movie.library.presentation.ui.size4dp
 import com.mihan.movie.library.presentation.ui.size6dp
@@ -53,13 +49,11 @@ fun MovieItem(
     modifier: Modifier = Modifier
 ) {
     var borderColor by remember { mutableStateOf(Color.Transparent) }
-    var focusedCard by remember { mutableStateOf(false) }
     Card(
         modifier = modifier
             .aspectRatio(2 / 3f)
             .padding(size10dp)
             .onFocusChanged {
-                focusedCard = it.isFocused
                 borderColor = if (it.isFocused) primaryColor else Color.Transparent
             },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background),
@@ -83,10 +77,7 @@ fun MovieItem(
                         .clip(RoundedCornerShape(size8dp))
                         .weight(1f),
                 )
-                VideoTitle(
-                    title = title,
-                    isFocused = focusedCard
-                )
+                VideoTitle(title = title)
             }
             if (category.isNotEmpty())
                 Category(
@@ -97,17 +88,14 @@ fun MovieItem(
     }
 }
 
-@OptIn(ExperimentalTvMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun VideoTitle(
     title: String,
-    modifier: Modifier = Modifier,
-    isFocused: Boolean
+    modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(size28dp),
+        modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -115,10 +103,9 @@ private fun VideoTitle(
             fontSize = size16sp,
             fontWeight = FontWeight.W700,
             color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 2,
             textAlign = TextAlign.Center,
-            modifier = modifier
-                .padding(horizontal = size2dp)
-            .basicMarquee( iterations = if (isFocused) 1 else 0)
+            modifier = modifier.padding(size2dp)
         )
     }
 }
