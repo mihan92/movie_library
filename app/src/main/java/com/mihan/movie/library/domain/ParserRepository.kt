@@ -2,6 +2,7 @@ package com.mihan.movie.library.domain
 
 import com.mihan.movie.library.common.entites.Filter
 import com.mihan.movie.library.common.entites.VideoCategory
+import com.mihan.movie.library.data.models.BaseUrlModelDto
 import com.mihan.movie.library.data.models.SeasonModelDto
 import com.mihan.movie.library.data.models.StreamDto
 import com.mihan.movie.library.data.models.VideoDetailDto
@@ -20,4 +21,10 @@ interface ParserRepository {
     suspend fun getVideosByTitle(videoTitle: String): List<VideoItemDto>
 
     suspend fun getSeasonsByTranslatorId(translatorId: String): List<SeasonModelDto>
+
+    suspend fun updateBaseUrl(baseUrl: String)
+
+    suspend fun getBaseUrl(): BaseUrlModelDto
+
+    suspend fun getStreamsByTranslatorId(translatorId: String): List<StreamDto>
 }

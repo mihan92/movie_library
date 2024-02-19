@@ -5,7 +5,7 @@ import com.mihan.movie.library.domain.models.ChangelogModel
 
 data class ChangelogDto(
     val latestVersion: String = Constants.EMPTY_STRING,
-    val latestVersionCode: Int = Constants.DEFAILT_INT,
+    val latestVersionCode: Int = Constants.DEFAULT_INT,
     val apkUrl: String = Constants.EMPTY_STRING,
     val releaseNotes: List<String> = emptyList()
 )

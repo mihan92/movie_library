@@ -9,21 +9,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class GetStreamsBySeasonIdUseCase @Inject constructor(private val parserRepository: ParserRepository) {
+class GetStreamsByTranslatorIdUseCase @Inject constructor(private val parserRepository: ParserRepository) {
     suspend operator fun invoke(
-        translationId: String,
-        videoId: String,
-        season: String,
-        episode: String
+        translatorId: String
     ): Flow<DtoState<List<StreamModel>>> = flow {
         try {
             emit(DtoState.Loading())
-            val streams = parserRepository
-                .getStreamsBySeasonId(translationId, videoId, season, episode)
-                .map { it.toStreamModel() }
+            val streams = parserRepository.getStreamsByTranslatorId(translatorId).map { it.toStreamModel() }
             emit(DtoState.Success(streams))
         } catch (e: Exception) {
-            logger("GetStreamsBySeasonIdUseCase error ${e.message}")
+            logger("GetStreamsByTranslatorIdUseCase error ${e.message}")
             emit(DtoState.Error("Не удалось получить ссылку на видео. Попробуйте еще раз"))
         }
     }

@@ -71,6 +71,17 @@ class DataStorePrefs @Inject constructor(@ApplicationContext context: Context) {
         }
     }
 
+    fun getRemoteParsing(): Flow<Boolean> =
+        dataStore.data.map { prefs ->
+            prefs[REMOTE_PARSING_KEY] ?: false
+        }
+
+    suspend fun setRemoteParsing(isSelected: Boolean) {
+        dataStore.edit { prefs ->
+            prefs[REMOTE_PARSING_KEY] = isSelected
+        }
+    }
+
     companion object {
         private const val DATA_STORE_NAME = "data_store_preferences"
         private val APP_UPDATES_KEY = booleanPreferencesKey("app_updates_key")
@@ -78,8 +89,9 @@ class DataStorePrefs @Inject constructor(@ApplicationContext context: Context) {
         private val VIDEO_QUALITY_KEY = stringPreferencesKey("video_quality")
         private val BASE_URL_KEY = stringPreferencesKey("base_url")
         private val PRIMARY_COLOR_KEY = stringPreferencesKey("primary_color")
+        private val REMOTE_PARSING_KEY = booleanPreferencesKey("remote_parsing")
         private val DEFAULT_VIDEO_CATEGORY = VideoCategory.All
-        private val DEFAULT_VIDEO_QUALITY = VideoQuality.Quality720
+        private val DEFAULT_VIDEO_QUALITY = VideoQuality.Quality1080
         private val DEFAULT_PRIMARY_COLOR = Colors.Color0
         private const val DEFAULT_BASE_URL = "https://hdrezka320wyi.org"
     }

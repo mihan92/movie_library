@@ -35,7 +35,7 @@ class AppUpdatesChecker @Inject constructor(
                         is DtoState.Error -> logger(state.errorMessage)
                         is DtoState.Loading -> Unit
                         is DtoState.Success -> {
-                            val latestVersionCode = state.data?.latestVersionCode ?: Constants.DEFAILT_INT
+                            val latestVersionCode = state.data?.latestVersionCode ?: Constants.DEFAULT_INT
                             dataStorePrefs.setAppUpdates(latestVersionCode > BuildConfig.VERSION_CODE)
                             changelog = state.data
                         }

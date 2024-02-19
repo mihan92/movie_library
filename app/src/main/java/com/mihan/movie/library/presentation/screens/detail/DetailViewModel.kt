@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.mihan.movie.library.common.Constants.EMPTY_STRING
 import com.mihan.movie.library.common.DataStorePrefs
 import com.mihan.movie.library.common.DtoState
+import com.mihan.movie.library.common.extentions.logger
 import com.mihan.movie.library.common.utils.whileUiSubscribed
 import com.mihan.movie.library.domain.models.SeasonModel
 import com.mihan.movie.library.domain.models.StreamModel
@@ -16,6 +17,7 @@ import com.mihan.movie.library.domain.models.VideoModel
 import com.mihan.movie.library.domain.usecases.GetDetailVideoByUrlUseCase
 import com.mihan.movie.library.domain.usecases.GetSeasonsByTranslatorIdUseCase
 import com.mihan.movie.library.domain.usecases.GetStreamsBySeasonIdUseCase
+import com.mihan.movie.library.domain.usecases.GetStreamsByTranslatorIdUseCase
 import com.mihan.movie.library.domain.usecases.GetTranslationsByUrlUseCase
 import com.mihan.movie.library.presentation.screens.navArgs
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,6 +38,7 @@ class DetailViewModel @Inject constructor(
     private val getTranslationsByUrlUseCase: GetTranslationsByUrlUseCase,
     private val getStreamsBySeasonIdUseCase: GetStreamsBySeasonIdUseCase,
     private val getSeasonsByTranslatorIdUseCase: GetSeasonsByTranslatorIdUseCase,
+    private val getStreamsByTranslatorIdUseCase: GetStreamsByTranslatorIdUseCase,
     dataStorePrefs: DataStorePrefs,
     savedStateHandle: SavedStateHandle,
     application: Application
@@ -74,18 +77,46 @@ class DetailViewModel @Inject constructor(
     private fun updateData() {
         if (_listOfSeasons.value.isEmpty() && !_videoData.value.isVideoHasTranslations) {
             //Фильм без переводов
-            val defaultTranslate = _videoData.value.videoStreamsWithTranslatorName.values.first()
-            _listOfStreams.update { defaultTranslate }
+            logger("Фильм без переводов")
+            val defaultTranslate = _videoData.value.translations.entries.first().value
+            viewModelScope.launch {
+                getStreamsByTranslatorId(defaultTranslate)
+            }
         } else if (_listOfSeasons.value.isEmpty()) {
             //Фильм с переводами
             showFilmDialog()
+            logger("Фильм с переводами")
         } else if (_videoData.value.isVideoHasSeries && !_videoData.value.isVideoHasTranslations) {
             //Сериал без переводов
             showSerialDialog()
+            logger("Сериал без переводов")
         } else if (_videoData.value.isVideoHasSeries) {
             //Сериал с переводами
             showSerialDialog()
+            logger("Сериал с переводами")
         }
+    }
+
+    private suspend fun getStreamsByTranslatorId(translatorId: String) {
+        getStreamsByTranslatorIdUseCase(translatorId)
+            .onEach { state ->
+                when (state) {
+                    is DtoState.Error -> _screenState.value = DetailScreenState(
+                        detailInfo = _screenState.value.detailInfo,
+                        errorMessage = state.errorMessage
+                    )
+                    is DtoState.Loading -> _screenState.value = DetailScreenState(
+                        detailInfo = _screenState.value.detailInfo,
+                        isLoading = true
+                    )
+                    is DtoState.Success -> { state.data?.let { list -> _listOfStreams.update { list } }
+                        _screenState.value = DetailScreenState(
+                            detailInfo = _screenState.value.detailInfo,
+                            isLoading = false
+                        )
+                    }
+                }
+            }.last()
     }
 
     private fun getSeasonsByTranslatorId(translatorId: String) {
@@ -147,9 +178,8 @@ class DetailViewModel @Inject constructor(
                     selectedStream.firstOrNull { it.quality == _videoQuality.first().quality } ?: selectedStream.last()
                 val videoPath = videoStream.url
                 var title = screenState.value.detailInfo?.title
-                val seasonsTitle =
-                    "  /  ${_seasonAndEpisodeTitle.first} сезон" + "  ${_seasonAndEpisodeTitle.second} серия"
-                if (videoData.value.isVideoHasSeries) title += seasonsTitle
+                if (videoData.value.isVideoHasSeries)
+                    title += getSeasonTitle(_seasonAndEpisodeTitle.first, _seasonAndEpisodeTitle.second)
                 title += "  (${videoStream.quality})"
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoPath)).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -166,6 +196,8 @@ class DetailViewModel @Inject constructor(
             }
         }
     }
+
+    private fun getSeasonTitle(season: String, episode: String) = "  /  Сезон $season  Серия $episode"
 
     private fun showSerialDialog() {
         _showSerialDialog.value = true
@@ -204,8 +236,10 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    fun selectedTranslate(translate: List<StreamModel>) {
-        _listOfStreams.update { translate }
+    fun selectedTranslate(translatorId: String) {
+        viewModelScope.launch {
+            getStreamsByTranslatorId(translatorId)
+        }
     }
 
     fun selectedTranslatorId(translationId: String) {

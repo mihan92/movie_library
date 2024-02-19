@@ -33,6 +33,8 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults.colors
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
+import androidx.tv.material3.Switch
+import androidx.tv.material3.SwitchDefaults
 import androidx.tv.material3.Text
 import com.mihan.movie.library.BuildConfig
 import com.mihan.movie.library.R
@@ -66,6 +68,7 @@ fun SettingsScreen(
     val siteUrl by settingsViewModel.getSiteUrl.collectAsStateWithLifecycle()
     val siteDialogState by settingsViewModel.siteDialogState.collectAsStateWithLifecycle()
     val primaryColor by settingsViewModel.getPrimaryColor.collectAsStateWithLifecycle()
+    val isRemoteParsingSelected by settingsViewModel.remoteParsing.collectAsStateWithLifecycle()
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
@@ -91,6 +94,11 @@ fun SettingsScreen(
                 onColorItemClicked = settingsViewModel::primaryColorChanged
             )
             SiteUrl(onButtonClick = settingsViewModel::onButtonShowDialogClicked)
+            if (BuildConfig.DEBUG)
+                RemoteParsing(
+                    isRemoteParsingSelected = isRemoteParsingSelected,
+                    settingsViewModel::onSwitchPressed
+                )
         }
         Text(
             text = stringResource(id = R.string.app_version_title, BuildConfig.VERSION_NAME),
@@ -121,9 +129,9 @@ private fun VideoCategory(
     Row(
         modifier = modifier
             .background(backgroundColor)
-            .padding(vertical = size10dp)
+            .padding(size10dp)
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         TitleWithDescription(titleResId = R.string.category_title, descResiId = R.string.category_description)
@@ -148,9 +156,9 @@ private fun VideoQuality(
     Row(
         modifier = modifier
             .background(backgroundColor)
-            .padding(vertical = size10dp)
+            .padding(size10dp)
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         TitleWithDescription(
@@ -214,9 +222,9 @@ private fun PrimaryColor(
     Row(
         modifier = modifier
             .background(backgroundColor)
-            .padding(vertical = size10dp)
+            .padding(size10dp)
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         TitleWithDescription(
@@ -229,6 +237,42 @@ private fun PrimaryColor(
             isFocused = { isFocused = it }
         )
     }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun RemoteParsing(
+    isRemoteParsingSelected: Boolean,
+    onSwitchPressed: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var isFocused by remember { mutableStateOf(false) }
+    val backgroundColor = if (isFocused) MaterialTheme.colorScheme.onBackground.copy(SELECTED_BACKGROUND_ALPHA)
+    else MaterialTheme.colorScheme.background
+    Row(
+        modifier = modifier
+            .background(backgroundColor)
+            .padding(size10dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TitleWithDescription(
+            titleResId = R.string.remote_parsing_title,
+            descResiId = R.string.remote_parsing_description
+        )
+        Switch(
+            checked = isRemoteParsingSelected,
+            onCheckedChange = { onSwitchPressed(it) },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.background
+            ),
+            modifier = modifier.onFocusChanged {
+                isFocused = it.isFocused
+            }
+        )
+    }
+
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
