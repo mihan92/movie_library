@@ -8,6 +8,7 @@ import com.mihan.movie.library.common.entites.Colors
 import com.mihan.movie.library.common.entites.VideoCategory
 import com.mihan.movie.library.common.entites.VideoQuality
 import com.mihan.movie.library.common.utils.whileUiSubscribed
+import com.mihan.movie.library.domain.usecases.UpdateBaseUrlUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +19,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val dataStorePrefs: DataStorePrefs
+    private val dataStorePrefs: DataStorePrefs,
+    private val updateBaseUrlUseCase: UpdateBaseUrlUseCase
 ) : ViewModel() {
 
     private val _siteDialogState = MutableStateFlow(false)
@@ -46,6 +48,12 @@ class SettingsViewModel @Inject constructor(
         Colors.Color0
     )
 
+    val remoteParsing = dataStorePrefs.getRemoteParsing().stateIn(
+        viewModelScope,
+        whileUiSubscribed,
+        false
+    )
+
     fun videoCategoryChanged(videoCategory: VideoCategory) {
         viewModelScope.launch {
             dataStorePrefs.setVideoCategory(videoCategory)
@@ -71,11 +79,20 @@ class SettingsViewModel @Inject constructor(
     fun onButtonDialogConfirmPressed(url: String) {
         _siteDialogState.update { false }
         viewModelScope.launch {
-            dataStorePrefs.setBaseUrl(url)
+            if (getSiteUrl.value != url) {
+                dataStorePrefs.setBaseUrl(url)
+                updateBaseUrlUseCase(url)
+            }
         }
     }
 
     fun onButtonDialogDismissPressed() {
         _siteDialogState.update { false }
+    }
+
+    fun onSwitchPressed(isSelected: Boolean) {
+        viewModelScope.launch {
+            dataStorePrefs.setRemoteParsing(isSelected)
+        }
     }
 }

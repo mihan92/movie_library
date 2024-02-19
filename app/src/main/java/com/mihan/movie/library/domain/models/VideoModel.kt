@@ -6,6 +6,5 @@ data class VideoModel(
     val videoId: String = Constants.EMPTY_STRING,
     val isVideoHasTranslations: Boolean = false,
     val isVideoHasSeries: Boolean = false,
-    val translations: Map<String, String> = emptyMap(),
-    val videoStreamsWithTranslatorName: Map<String, List<StreamModel>> = emptyMap(),
+    val translations: Map<String, String> = emptyMap()
 )

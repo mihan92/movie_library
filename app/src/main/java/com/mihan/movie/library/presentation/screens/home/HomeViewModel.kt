@@ -10,6 +10,7 @@ import com.mihan.movie.library.common.utils.whileUiSubscribed
 import com.mihan.movie.library.domain.usecases.GetListVideoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.last
@@ -25,7 +26,7 @@ class HomeViewModel @Inject constructor(
     private val _screenState = MutableStateFlow(HomeScreenState())
     private val _filterState = MutableStateFlow(Filter.Watching)
     private val _pageState = MutableStateFlow(FIRST_PAGE)
-    val screenState = _screenState.asStateFlow()
+    val screenState = _screenState.asSharedFlow()
     val filterState = _filterState.asStateFlow()
     val pageState = _pageState.asStateFlow()
     val videoCategoryState = dataStorePrefs.getVideoCategory().stateIn(

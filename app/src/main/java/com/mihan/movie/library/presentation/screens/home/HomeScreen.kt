@@ -47,7 +47,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     navigator: DestinationsNavigator
 ) {
-    val screenState by viewModel.screenState.collectAsStateWithLifecycle()
+    val screenState by viewModel.screenState.collectAsStateWithLifecycle(HomeScreenState())
     val filterState by viewModel.filterState.collectAsStateWithLifecycle()
     val currentPage by viewModel.pageState.collectAsStateWithLifecycle()
     val videoCategory by viewModel.videoCategoryState.collectAsStateWithLifecycle()

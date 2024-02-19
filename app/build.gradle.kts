@@ -1,3 +1,4 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import java.util.Locale
 
 plugins {
@@ -16,12 +17,13 @@ android {
         applicationId = "com.mihan.movie.library"
         minSdk = 28
         targetSdk = 34
-        versionCode = 8
-        versionName = "0.5.0"
+        versionCode = 9
+        versionName = "0.5.1"
         vectorDrawables {
             useSupportLibrary = true
         }
         setProperty("archivesBaseName", rootProject.name.lowercase(Locale.getDefault()))
+        buildConfigField("String", "ACCESS_TOKEN", gradleLocalProperties(rootDir).getProperty("accessToken"))
     }
 
     buildTypes {

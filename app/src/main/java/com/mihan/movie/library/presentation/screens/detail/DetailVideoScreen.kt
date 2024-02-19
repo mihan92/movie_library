@@ -72,31 +72,39 @@ fun DetailVideoScreen(
     val serialDialogState = detailViewModel.showSerialDialog.collectAsStateWithLifecycle()
     val dataState by detailViewModel.videoData.collectAsStateWithLifecycle()
     val listOfSeasons by detailViewModel.listOfSeasons.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         if (screenState.errorMessage.isNotEmpty())
-            Toast.makeText(LocalContext.current, screenState.errorMessage, Toast.LENGTH_LONG).show()
+            Toast.makeText(context, screenState.errorMessage, Toast.LENGTH_LONG).show()
         screenState.detailInfo?.let { detailModel ->
             Content(
                 videoDetailModel = detailModel,
-                onButtonWatchClick = { detailViewModel.getTranslations() }
+                onButtonWatchClick = {
+                    if (detailModel.errorMessage.isEmpty())
+                        detailViewModel.getTranslations()
+                    else
+                        Toast.makeText(context, detailModel.errorMessage, Toast.LENGTH_LONG).show()
+                }
             )
         }
-        if (screenState.isLoading)
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background.copy(DARKENING_SCREEN_DURING_LOADING_PROCESS)),
+        if (screenState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background.copy(DARKENING_SCREEN_DURING_LOADING_PROCESS)),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
+        }
         FilmDialog(
             isDialogShow = filmDialogState,
             translations = dataState.translations,
             onTranslationItemClicked = { translate ->
-                val selectedTranslate = dataState.videoStreamsWithTranslatorName.getValue(translate)
+                val selectedTranslate = dataState.translations.getValue(translate)
                 detailViewModel.selectedTranslate(selectedTranslate)
             },
             onDialogDismiss = detailViewModel::onDialogDismiss
@@ -219,7 +227,8 @@ private fun VideoInfo(
         ItemInfo(title = stringResource(id = R.string.release_date_title, videoDetailModel.releaseDate))
         ItemInfo(title = stringResource(id = R.string.country_title, videoDetailModel.country))
         ItemInfo(title = stringResource(id = R.string.genre_title, videoDetailModel.genre))
-        ItemInfo(title = videoDetailModel.actors)
+        if (videoDetailModel.actors.isNotEmpty())
+            ItemInfo(title = stringResource(id = R.string.actors_title, videoDetailModel.actors))
     }
 }
 

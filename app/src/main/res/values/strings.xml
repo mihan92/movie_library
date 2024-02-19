@@ -30,7 +30,7 @@
     <string name="category_title">Категория</string>
     <string name="category_description">Выберите подходящую для себя категорию видео. По умолчанию выбраны все категории</string>
     <string name="quality_title">Качество</string>
-    <string name="quality_description">По умолчанию установлено среднее качество видео. Если установленное качество не будет найдено, то будет установлено максимально доступное качество для этого видео</string>
+    <string name="quality_description">По умолчанию установлено FullHD качество видео. Если установленное качество не будет найдено, то будет установлено максимально доступное качество для этого видео</string>
     <string name="app_version_title">Версия %\s</string>
     <string name="site_url_title">Ссылка на сайт</string>
     <string name="site_url_description">Текущая ссылка на сайт. При изменении не указывайте слеш в конце ссылки</string>
@@ -45,4 +45,7 @@
     <string name="genre_title">Жанр: %\s</string>
     <string name="primary_color_title">Основной цвет</string>
     <string name="primary_color_description">Выберите основной цвет приложения на своё усмотрение</string>
+    <string name="remote_parsing_title">Удаленный парсинг (экспериментальная функция)</string>
+    <string name="remote_parsing_description">Если включена эта опция, то данные фильмов парсятся и берутся из внешнего сервера</string>
+    <string name="actors_title">В ролях: %\s</string>
 </resources>
