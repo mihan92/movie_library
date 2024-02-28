@@ -6,8 +6,10 @@ import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.DialogNavigator
 import com.mihan.movie.library.common.utils.VoiceRecognizer
 import com.mihan.movie.library.data.repository.AppUpdateRepositoryImpl
+import com.mihan.movie.library.data.repository.LocalVideoVideoHistoryRepositoryImpl
 import com.mihan.movie.library.data.repository.ParserRepositoryImpl
 import com.mihan.movie.library.domain.AppUpdateRepository
+import com.mihan.movie.library.domain.LocalVideoHistoryRepository
 import com.mihan.movie.library.domain.ParserRepository
 import dagger.Binds
 import dagger.Module
@@ -25,6 +27,9 @@ interface ActivityRetainedModule {
 
     @Binds
     fun bindsAppUpdateRepository(impl: AppUpdateRepositoryImpl): AppUpdateRepository
+
+    @Binds
+    fun bindsLocalVideoHistoryRepository(impl: LocalVideoVideoHistoryRepositoryImpl): LocalVideoHistoryRepository
 
     companion object {
 

@@ -47,6 +47,7 @@ import com.mihan.movie.library.presentation.ui.size14sp
 import com.mihan.movie.library.presentation.ui.size16dp
 import com.mihan.movie.library.presentation.ui.size1dp
 import com.mihan.movie.library.presentation.ui.size20sp
+import com.mihan.movie.library.presentation.ui.size8dp
 import com.mihan.movie.library.presentation.ui.view.ChangingSiteUrlDialog
 import com.mihan.movie.library.presentation.ui.view.PrimaryColorDropDownMenu
 import com.mihan.movie.library.presentation.ui.view.VideoCategoryDropDownMenu
@@ -128,7 +129,7 @@ private fun VideoCategory(
     else MaterialTheme.colorScheme.background
     Row(
         modifier = modifier
-            .background(backgroundColor)
+            .background(backgroundColor, RoundedCornerShape(size8dp))
             .padding(size10dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -155,7 +156,7 @@ private fun VideoQuality(
     else MaterialTheme.colorScheme.background
     Row(
         modifier = modifier
-            .background(backgroundColor)
+            .background(backgroundColor, RoundedCornerShape(size8dp))
             .padding(size10dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -185,7 +186,7 @@ private fun SiteUrl(
     else MaterialTheme.colorScheme.background
     Row(
         modifier = modifier
-            .background(backgroundColor)
+            .background(backgroundColor, RoundedCornerShape(size8dp))
             .padding(size10dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -221,7 +222,7 @@ private fun PrimaryColor(
     else MaterialTheme.colorScheme.background
     Row(
         modifier = modifier
-            .background(backgroundColor)
+            .background(backgroundColor, RoundedCornerShape(size8dp))
             .padding(size10dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -251,7 +252,7 @@ private fun RemoteParsing(
     else MaterialTheme.colorScheme.background
     Row(
         modifier = modifier
-            .background(backgroundColor)
+            .background(backgroundColor, RoundedCornerShape(size8dp))
             .padding(size10dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,

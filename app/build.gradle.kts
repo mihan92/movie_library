@@ -17,8 +17,8 @@ android {
         applicationId = "com.mihan.movie.library"
         minSdk = 28
         targetSdk = 34
-        versionCode = 9
-        versionName = "0.5.1"
+        versionCode = 10
+        versionName = "0.6.0"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -69,15 +69,17 @@ dependencies {
     val coilVersion = "2.5.0"
     val dataStoreVersion = "1.0.0"
     val permissionsVersion = "0.25.1"
+    val composeBomVersion = "2024.02.00"
+    val roomVersion = "2.6.1"
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.tv:tv-foundation:1.0.0-alpha07") //пока не трогать, много чего экспериментального
     implementation("androidx.tv:tv-material:1.0.0-alpha07") //пока не трогать, много чего экспериментального
     implementation("androidx.media3:media3-extractor:1.2.1")
-    implementation("androidx.compose.material3:material3:1.1.2")
+    implementation("androidx.compose.material3:material3:1.2.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
@@ -97,7 +99,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
     //Jsoup
-    implementation ("org.jsoup:jsoup:1.17.1")
+    implementation ("org.jsoup:jsoup:1.17.2")
 
     //Load Images
     implementation("io.coil-kt:coil-compose:$coilVersion")
@@ -108,8 +110,13 @@ dependencies {
     //Checking permissions
     implementation ("com.google.accompanist:accompanist-permissions:$permissionsVersion")
 
+    //Room
+    implementation ("androidx.room:room-runtime:$roomVersion")
+    implementation ("androidx.room:room-ktx:$roomVersion")
+    ksp ("androidx.room:room-compiler:$roomVersion")
+
     //Tests
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

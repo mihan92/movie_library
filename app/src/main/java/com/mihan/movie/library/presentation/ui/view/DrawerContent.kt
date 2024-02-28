@@ -1,6 +1,7 @@
 package com.mihan.movie.library.presentation.ui.view
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -8,11 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavHostController
@@ -44,11 +41,12 @@ import com.mihan.movie.library.presentation.ui.size4dp
 private const val DRAWER_WIDTH_FRACTION = 0.12f
 private const val CONTENT_ALPHA = 0.7f
 
-enum class DrawerItems(val route: String, val icon: ImageVector, @DrawableRes val titleResId: Int) {
-    Updates(Screens.AppUpdatesScreen.route, Icons.Rounded.Notifications, R.string.updates_route_title),
-    Search(Screens.Search.route, Icons.Rounded.Search, R.string.search_route_title),
-    Home(Screens.Home.route, Icons.Rounded.Home, R.string.home_route_title),
-    Settings(Screens.Settings.route, Icons.Rounded.Settings, R.string.settings_route_title)
+enum class DrawerItems(val route: String, @DrawableRes val icon: Int, @StringRes val titleResId: Int) {
+    Updates(Screens.AppUpdatesScreen.route, R.drawable.ic_notifications, R.string.updates_route_title),
+    Search(Screens.Search.route, R.drawable.ic_search, R.string.search_route_title),
+    Home(Screens.Home.route, R.drawable.ic_home, R.string.home_route_title),
+    History(Screens.HistoryScreen.route, R.drawable.ic_history, R.string.history_route_title),
+    Settings(Screens.Settings.route, R.drawable.ic_settings, R.string.settings_route_title)
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -69,7 +67,7 @@ fun DrawerContent(
         DrawerItems.entries.forEach { item ->
             NavigationItem(
                 drawerState = drawerState,
-                icon = item.icon,
+                icon = ImageVector.vectorResource(item.icon),
                 titleResId = item.titleResId,
                 selected = item.route == currentDestination,
                 isVisible = if (item.route == Screens.AppUpdatesScreen.route) isAppUpdatesAvailable else true,

@@ -72,6 +72,7 @@ fun DetailVideoScreen(
     val serialDialogState = detailViewModel.showSerialDialog.collectAsStateWithLifecycle()
     val dataState by detailViewModel.videoData.collectAsStateWithLifecycle()
     val listOfSeasons by detailViewModel.listOfSeasons.collectAsStateWithLifecycle()
+    val videoHistoryModel by detailViewModel.videoHistoryModel.collectAsStateWithLifecycle()
     val context = LocalContext.current
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -105,17 +106,18 @@ fun DetailVideoScreen(
             translations = dataState.translations,
             onTranslationItemClicked = { translate ->
                 val selectedTranslate = dataState.translations.getValue(translate)
-                detailViewModel.selectedTranslate(selectedTranslate)
+                detailViewModel.selectTranslateForFilms(selectedTranslate)
             },
             onDialogDismiss = detailViewModel::onDialogDismiss
         )
         SerialDialog(
             isDialogShow = serialDialogState,
+            videoHistoryModel = videoHistoryModel,
             translations = dataState.translations,
             seasons = listOfSeasons,
             onTranslationItemClicked = { translate ->
                 val translatorId = dataState.translations.getValue(translate)
-                detailViewModel.selectedTranslatorId(translatorId)
+                detailViewModel.selectTranslateForSerials(translatorId)
             },
             onEpisodeClicked = { season, episode ->
                 detailViewModel.onEpisodeClicked(season, episode)

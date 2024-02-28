@@ -108,7 +108,8 @@ class MainActivity : ComponentActivity() {
             Screens.Home.route,
             Screens.Search.route,
             Screens.Settings.route,
-            Screens.AppUpdatesScreen.route
+            Screens.HistoryScreen.route,
+            Screens.AppUpdatesScreen.route,
         )
         private const val TIME_INTERVAL = 3000L
     }

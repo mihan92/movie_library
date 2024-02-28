@@ -2,9 +2,12 @@ package com.mihan.movie.library.di
 
 import android.app.DownloadManager
 import android.content.Context
+import androidx.room.Room
 import com.mihan.movie.library.common.Constants
 import com.mihan.movie.library.common.utils.DownloadManagerImpl
 import com.mihan.movie.library.common.utils.IDownloadManager
+import com.mihan.movie.library.data.local.db.VideoHistoryDao
+import com.mihan.movie.library.data.local.db.VideoHistoryDataBase
 import com.mihan.movie.library.data.remote.GsonApiService
 import com.mihan.movie.library.data.remote.RemoteParserApiService
 import dagger.Binds
@@ -64,5 +67,20 @@ interface AppModule {
         fun provideRetrofit(client: OkHttpClient): Retrofit.Builder = Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
+
+        @Provides
+        @Singleton
+        fun provideHistoryDataBase(@ApplicationContext appContext: Context): VideoHistoryDataBase =
+            Room.databaseBuilder(
+                appContext,
+                VideoHistoryDataBase::class.java,
+                DB_NAME
+            ).build()
+
+        @Provides
+        fun provideVideoHistoryDao(videoHistoryDataBase: VideoHistoryDataBase): VideoHistoryDao =
+            videoHistoryDataBase.videoHistoryDao()
+
+        private const val DB_NAME = "video_history"
     }
 }

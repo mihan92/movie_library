@@ -13,12 +13,15 @@ import com.mihan.movie.library.common.extentions.logger
 import com.mihan.movie.library.common.utils.whileUiSubscribed
 import com.mihan.movie.library.domain.models.SeasonModel
 import com.mihan.movie.library.domain.models.StreamModel
+import com.mihan.movie.library.domain.models.VideoHistoryModel
 import com.mihan.movie.library.domain.models.VideoModel
 import com.mihan.movie.library.domain.usecases.GetDetailVideoByUrlUseCase
 import com.mihan.movie.library.domain.usecases.GetSeasonsByTranslatorIdUseCase
 import com.mihan.movie.library.domain.usecases.GetStreamsBySeasonIdUseCase
 import com.mihan.movie.library.domain.usecases.GetStreamsByTranslatorIdUseCase
 import com.mihan.movie.library.domain.usecases.GetTranslationsByUrlUseCase
+import com.mihan.movie.library.domain.usecases.GetVideoHistoryByIdUseCase
+import com.mihan.movie.library.domain.usecases.UpdateVideoHistoryUseCase
 import com.mihan.movie.library.presentation.screens.navArgs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +42,8 @@ class DetailViewModel @Inject constructor(
     private val getStreamsBySeasonIdUseCase: GetStreamsBySeasonIdUseCase,
     private val getSeasonsByTranslatorIdUseCase: GetSeasonsByTranslatorIdUseCase,
     private val getStreamsByTranslatorIdUseCase: GetStreamsByTranslatorIdUseCase,
+    private val updateVideoHistoryUseCase: UpdateVideoHistoryUseCase,
+    private val getVideoHistoryByIdUseCase: GetVideoHistoryByIdUseCase,
     dataStorePrefs: DataStorePrefs,
     savedStateHandle: SavedStateHandle,
     application: Application
@@ -50,28 +55,45 @@ class DetailViewModel @Inject constructor(
     private val _listOfStreams = MutableStateFlow<List<StreamModel>>(emptyList())
     private val _videoData = MutableStateFlow(VideoModel())
     private var _translatorId = _videoData.value.translations.values.firstOrNull()
+    private var _translatorName = _videoData.value.translations.keys.firstOrNull()
     private val _listOfSeasons = MutableStateFlow<List<SeasonModel>>(emptyList())
     private var _seasonAndEpisodeTitle = Pair(EMPTY_STRING, EMPTY_STRING)
     private val _videoQuality = dataStorePrefs.getVideoQuality().shareIn(viewModelScope, whileUiSubscribed, 1)
+    private val _videoHistoryModel = MutableStateFlow<VideoHistoryModel?>(null)
 
     val videoData = _videoData.asStateFlow()
     val showFilmDialog = _showFilmDialog.asStateFlow()
     val showSerialDialog = _showSerialDialog.asStateFlow()
     val screenState = _screenState.asStateFlow()
     val listOfSeasons = _listOfSeasons.asStateFlow()
+    val videoHistoryModel = _videoHistoryModel.asStateFlow()
 
     init {
+        getVideoDetailInfo()
+        updateListOfStreams()
+    }
+
+    private fun getVideoDetailInfo() {
         viewModelScope.launch {
             getDetailVideoByUrlUseCase(navArgs.movieUrl)
                 .onEach { state ->
                     when (state) {
                         is DtoState.Error -> _screenState.value = DetailScreenState(errorMessage = state.errorMessage)
                         is DtoState.Loading -> _screenState.value = DetailScreenState(isLoading = true)
-                        is DtoState.Success -> _screenState.value = DetailScreenState(detailInfo = state.data)
+                        is DtoState.Success -> {
+                            _screenState.value = DetailScreenState(detailInfo = state.data)
+                            state.data?.let { data -> getVideoHistoryData(data.videoId) }
+                        }
                     }
                 }.last()
         }
-        updateListOfStreams()
+    }
+
+    private fun getVideoHistoryData(videoId: String) {
+        getVideoHistoryByIdUseCase(videoId)
+            .onEach { historyModel ->
+                _videoHistoryModel.update { historyModel }
+            }.launchIn(viewModelScope)
     }
 
     private fun updateData() {
@@ -105,11 +127,14 @@ class DetailViewModel @Inject constructor(
                         detailInfo = _screenState.value.detailInfo,
                         errorMessage = state.errorMessage
                     )
+
                     is DtoState.Loading -> _screenState.value = DetailScreenState(
                         detailInfo = _screenState.value.detailInfo,
                         isLoading = true
                     )
-                    is DtoState.Success -> { state.data?.let { list -> _listOfStreams.update { list } }
+
+                    is DtoState.Success -> {
+                        state.data?.let { list -> _listOfStreams.update { list } }
                         _screenState.value = DetailScreenState(
                             detailInfo = _screenState.value.detailInfo,
                             isLoading = false
@@ -187,6 +212,24 @@ class DetailViewModel @Inject constructor(
                     putExtra("title", title)
                 }
                 context.startActivity(intent)
+                _screenState.value.detailInfo?.let { detailInfo ->
+                    val watchingTime = System.currentTimeMillis()
+                    val videoPageUrl = Uri.parse(navArgs.movieUrl).path
+                    logger("translator name $_translatorName")
+                    val model = VideoHistoryModel(
+                        videoId = detailInfo.videoId,
+                        videoPageUrl = videoPageUrl ?: EMPTY_STRING,
+                        videoTitle = detailInfo.title,
+                        posterUrl = detailInfo.imageUrl,
+                        translatorName = _translatorName ?: EMPTY_STRING,
+                        translatorId = _translatorId ?: EMPTY_STRING,
+                        season = _seasonAndEpisodeTitle.first,
+                        episode = _seasonAndEpisodeTitle.second,
+                        watchingTime = watchingTime
+                    )
+                    updateVideoHistoryUseCase(model)
+                }
+
                 _listOfStreams.update { emptyList() }
             } catch (e: Exception) {
                 _screenState.value = DetailScreenState(
@@ -226,9 +269,15 @@ class DetailViewModel @Inject constructor(
                             _screenState.value = DetailScreenState(detailInfo = _screenState.value.detailInfo)
                             _videoData.value = state.data!!
                             _translatorId = state.data.translations.values.first()
-                            if (state.data.isVideoHasSeries)
-                                getSeasonsByTranslatorId(state.data.translations.values.first())
-                            else
+                            _translatorName = state.data.translations.keys.first()
+                            if (state.data.isVideoHasSeries) {
+                                if (_videoHistoryModel.value != null) {
+                                        _translatorId = _videoHistoryModel.value?.translatorId!!
+                                        _translatorName = _videoHistoryModel.value?.translatorName
+                                        getSeasonsByTranslatorId(_videoHistoryModel.value?.translatorId!!)
+                                } else
+                                    getSeasonsByTranslatorId(state.data.translations.values.first())
+                            } else
                                 updateData()
                         }
                     }
@@ -236,14 +285,15 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    fun selectedTranslate(translatorId: String) {
+    fun selectTranslateForFilms(translatorId: String) {
         viewModelScope.launch {
             getStreamsByTranslatorId(translatorId)
         }
     }
 
-    fun selectedTranslatorId(translationId: String) {
+    fun selectTranslateForSerials(translationId: String) {
         _translatorId = translationId
+        _translatorName = _videoData.value.translations.entries.firstOrNull { it.value == translationId }?.key
         getSeasonsByTranslatorId(translationId)
     }
 
