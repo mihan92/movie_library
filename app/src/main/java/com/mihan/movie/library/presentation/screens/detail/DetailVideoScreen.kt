@@ -73,6 +73,7 @@ fun DetailVideoScreen(
     val dataState by detailViewModel.videoData.collectAsStateWithLifecycle()
     val listOfSeasons by detailViewModel.listOfSeasons.collectAsStateWithLifecycle()
     val videoHistoryModel by detailViewModel.videoHistoryModel.collectAsStateWithLifecycle()
+    val isVideoHasFavourites by detailViewModel.isVideoHasFavourites.collectAsStateWithLifecycle()
     val context = LocalContext.current
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -83,12 +84,14 @@ fun DetailVideoScreen(
         screenState.detailInfo?.let { detailModel ->
             Content(
                 videoDetailModel = detailModel,
+                isVideoHasFavourites = isVideoHasFavourites,
                 onButtonWatchClick = {
                     if (detailModel.errorMessage.isEmpty())
                         detailViewModel.getTranslations()
                     else
                         Toast.makeText(context, detailModel.errorMessage, Toast.LENGTH_LONG).show()
-                }
+                },
+                onButtonFavouritesClick = detailViewModel::onButtonFavouritesClick
             )
         }
         if (screenState.isLoading) {
@@ -130,7 +133,9 @@ fun DetailVideoScreen(
 @Composable
 private fun Content(
     videoDetailModel: VideoDetailModel,
+    isVideoHasFavourites: Boolean,
     onButtonWatchClick: () -> Unit,
+    onButtonFavouritesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -155,7 +160,9 @@ private fun Content(
             Poster(videoDetailModel)
             VideoInfo(
                 videoDetailModel = videoDetailModel,
-                onButtonWatchClick = onButtonWatchClick
+                isVideoHasFavourites = isVideoHasFavourites,
+                onButtonWatchClick = onButtonWatchClick,
+                onButtonFavouritesClick = onButtonFavouritesClick
             )
         }
         Text(
@@ -216,7 +223,9 @@ private fun Poster(
 @Composable
 private fun VideoInfo(
     videoDetailModel: VideoDetailModel,
+    isVideoHasFavourites: Boolean,
     onButtonWatchClick: () -> Unit,
+    onButtonFavouritesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -224,7 +233,11 @@ private fun VideoInfo(
         verticalArrangement = Arrangement.Bottom
     ) {
         VideoTitle(videoDetailModel = videoDetailModel)
-        ButtonsSection(onButtonWatchClick = onButtonWatchClick)
+        ButtonsSection(
+            isVideoHasFavourites = isVideoHasFavourites,
+            onButtonWatchClick = onButtonWatchClick,
+            onButtonFavouritesClick = onButtonFavouritesClick
+        )
         RatingInfo(videoDetailModel)
         ItemInfo(title = stringResource(id = R.string.release_date_title, videoDetailModel.releaseDate))
         ItemInfo(title = stringResource(id = R.string.country_title, videoDetailModel.country))
@@ -254,6 +267,8 @@ private fun RatingInfo(
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun ButtonsSection(
+    isVideoHasFavourites: Boolean,
+    onButtonFavouritesClick: () -> Unit,
     onButtonWatchClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -287,6 +302,31 @@ private fun ButtonsSection(
                     fontWeight = FontWeight.W700,
                     color = MaterialTheme.colorScheme.background
                 )
+            }
+            Button(
+                shape = RoundedCornerShape(size4dp),
+                onClick = onButtonFavouritesClick,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                elevation = ButtonDefaults.elevatedButtonElevation(
+                    defaultElevation = size1dp,
+                    focusedElevation = size10dp
+                ),
+                modifier = modifier
+                    .padding(start = size28dp)
+                    .focusRequester(focusRequester)
+            ) {
+                if (isVideoHasFavourites)
+                    Text(
+                        text = stringResource(id = R.string.delete_from_favourites_title).uppercase(),
+                        fontWeight = FontWeight.W700,
+                        color = MaterialTheme.colorScheme.background
+                    )
+                else
+                    Text(
+                        text = stringResource(id = R.string.add_to_favourites_title).uppercase(),
+                        fontWeight = FontWeight.W700,
+                        color = MaterialTheme.colorScheme.background
+                    )
             }
         }
         LaunchedEffect(key1 = Unit) {

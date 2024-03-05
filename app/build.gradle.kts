@@ -17,8 +17,8 @@ android {
         applicationId = "com.mihan.movie.library"
         minSdk = 28
         targetSdk = 34
-        versionCode = 10
-        versionName = "0.6.0"
+        versionCode = 11
+        versionName = "0.7.0"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -69,7 +69,7 @@ dependencies {
     val coilVersion = "2.5.0"
     val dataStoreVersion = "1.0.0"
     val permissionsVersion = "0.25.1"
-    val composeBomVersion = "2024.02.00"
+    val composeBomVersion = "2024.02.01"
     val roomVersion = "2.6.1"
 
     implementation("androidx.core:core-ktx:1.12.0")
@@ -87,7 +87,7 @@ dependencies {
     //DI
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt ("com.google.dagger:hilt-compiler:$hiltVersion")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     //Navigation
     implementation("io.github.raamcosta.compose-destinations:animations-core:$navigationVersion")

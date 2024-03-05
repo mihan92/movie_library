@@ -6,6 +6,8 @@ import androidx.room.Room
 import com.mihan.movie.library.common.Constants
 import com.mihan.movie.library.common.utils.DownloadManagerImpl
 import com.mihan.movie.library.common.utils.IDownloadManager
+import com.mihan.movie.library.data.local.db.FavouritesDao
+import com.mihan.movie.library.data.local.db.FavouritesDataBase
 import com.mihan.movie.library.data.local.db.VideoHistoryDao
 import com.mihan.movie.library.data.local.db.VideoHistoryDataBase
 import com.mihan.movie.library.data.remote.GsonApiService
@@ -74,13 +76,29 @@ interface AppModule {
             Room.databaseBuilder(
                 appContext,
                 VideoHistoryDataBase::class.java,
-                DB_NAME
+                HISTORY_DB_NAME
             ).build()
 
         @Provides
+        @Singleton
         fun provideVideoHistoryDao(videoHistoryDataBase: VideoHistoryDataBase): VideoHistoryDao =
             videoHistoryDataBase.videoHistoryDao()
 
-        private const val DB_NAME = "video_history"
+        @Provides
+        @Singleton
+        fun providesFavouritesDataBase(@ApplicationContext appContext: Context): FavouritesDataBase =
+            Room.databaseBuilder(
+                appContext,
+                FavouritesDataBase::class.java,
+                FAVOURITES_DB_NAME
+            ).build()
+
+        @Provides
+        @Singleton
+        fun providesFavouritesDao(favouritesDataBase: FavouritesDataBase): FavouritesDao =
+            favouritesDataBase.favouritesDao()
+
+        private const val HISTORY_DB_NAME = "video_history"
+        private const val FAVOURITES_DB_NAME = "video_favourites"
     }
 }

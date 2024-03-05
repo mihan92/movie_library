@@ -46,6 +46,7 @@ enum class DrawerItems(val route: String, @DrawableRes val icon: Int, @StringRes
     Search(Screens.Search.route, R.drawable.ic_search, R.string.search_route_title),
     Home(Screens.Home.route, R.drawable.ic_home, R.string.home_route_title),
     History(Screens.HistoryScreen.route, R.drawable.ic_history, R.string.history_route_title),
+    Favourites(Screens.FavouritesScreen.route, R.drawable.ic_favourites, R.string.favourites_route_title),
     Settings(Screens.Settings.route, R.drawable.ic_settings, R.string.settings_route_title)
 }
 

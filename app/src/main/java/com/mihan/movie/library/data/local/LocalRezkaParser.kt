@@ -6,6 +6,7 @@ import com.mihan.movie.library.common.Constants
 import com.mihan.movie.library.common.DataStorePrefs
 import com.mihan.movie.library.common.entites.Filter
 import com.mihan.movie.library.common.entites.VideoCategory
+import com.mihan.movie.library.common.extentions.logger
 import com.mihan.movie.library.data.models.SeasonModelDto
 import com.mihan.movie.library.data.models.StreamDto
 import com.mihan.movie.library.data.models.VideoDetailDto
@@ -201,7 +202,7 @@ class LocalRezkaParser @Inject constructor(
     suspend fun getTranslationsByUrl(url: String): VideoDto = withContext(Dispatchers.IO) {
         val document = getConnection(url).get()
         val isVideoHasTranslation = document.select("div.b-translators__block").hasText()
-        val isVideoHasSeries = document.select("ul.b-simple_seasons__list").hasText()
+        val isVideoHasSeries = document.select("ul.b-simple_episodes__list").hasText()
         val translations = getTranslations(document)
         VideoDto(
             videoId = filmId,

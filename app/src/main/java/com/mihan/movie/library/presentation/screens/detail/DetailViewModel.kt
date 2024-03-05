@@ -11,11 +11,15 @@ import com.mihan.movie.library.common.DataStorePrefs
 import com.mihan.movie.library.common.DtoState
 import com.mihan.movie.library.common.extentions.logger
 import com.mihan.movie.library.common.utils.whileUiSubscribed
+import com.mihan.movie.library.domain.models.FavouritesModel
 import com.mihan.movie.library.domain.models.SeasonModel
 import com.mihan.movie.library.domain.models.StreamModel
 import com.mihan.movie.library.domain.models.VideoHistoryModel
 import com.mihan.movie.library.domain.models.VideoModel
+import com.mihan.movie.library.domain.usecases.AddToFavouritesUseCase
+import com.mihan.movie.library.domain.usecases.DeleteFromFavouritesUseCase
 import com.mihan.movie.library.domain.usecases.GetDetailVideoByUrlUseCase
+import com.mihan.movie.library.domain.usecases.GetFavoriteByIdUseCase
 import com.mihan.movie.library.domain.usecases.GetSeasonsByTranslatorIdUseCase
 import com.mihan.movie.library.domain.usecases.GetStreamsBySeasonIdUseCase
 import com.mihan.movie.library.domain.usecases.GetStreamsByTranslatorIdUseCase
@@ -44,6 +48,9 @@ class DetailViewModel @Inject constructor(
     private val getStreamsByTranslatorIdUseCase: GetStreamsByTranslatorIdUseCase,
     private val updateVideoHistoryUseCase: UpdateVideoHistoryUseCase,
     private val getVideoHistoryByIdUseCase: GetVideoHistoryByIdUseCase,
+    private val getFavoriteByIdUseCase: GetFavoriteByIdUseCase,
+    private val addToFavouritesUseCase: AddToFavouritesUseCase,
+    private val deleteFromFavouritesUseCase: DeleteFromFavouritesUseCase,
     dataStorePrefs: DataStorePrefs,
     savedStateHandle: SavedStateHandle,
     application: Application
@@ -60,6 +67,7 @@ class DetailViewModel @Inject constructor(
     private var _seasonAndEpisodeTitle = Pair(EMPTY_STRING, EMPTY_STRING)
     private val _videoQuality = dataStorePrefs.getVideoQuality().shareIn(viewModelScope, whileUiSubscribed, 1)
     private val _videoHistoryModel = MutableStateFlow<VideoHistoryModel?>(null)
+    private val _isVideoHasFavourites = MutableStateFlow(false)
 
     val videoData = _videoData.asStateFlow()
     val showFilmDialog = _showFilmDialog.asStateFlow()
@@ -67,10 +75,89 @@ class DetailViewModel @Inject constructor(
     val screenState = _screenState.asStateFlow()
     val listOfSeasons = _listOfSeasons.asStateFlow()
     val videoHistoryModel = _videoHistoryModel.asStateFlow()
+    val isVideoHasFavourites = _isVideoHasFavourites.asStateFlow()
 
     init {
         getVideoDetailInfo()
         updateListOfStreams()
+    }
+
+    fun getTranslations() {
+        viewModelScope.launch {
+            getTranslationsByUrlUseCase(navArgs.movieUrl)
+                .onEach { state ->
+                    when (state) {
+                        is DtoState.Error -> _screenState.value = DetailScreenState(
+                            detailInfo = _screenState.value.detailInfo,
+                            errorMessage = state.errorMessage
+                        )
+
+                        is DtoState.Loading -> _screenState.value = DetailScreenState(
+                            detailInfo = _screenState.value.detailInfo,
+                            isLoading = true
+                        )
+
+                        is DtoState.Success -> {
+                            _screenState.value = DetailScreenState(detailInfo = _screenState.value.detailInfo)
+                            _videoData.value = state.data!!
+                            _translatorId = state.data.translations.values.first()
+                            _translatorName = state.data.translations.keys.first()
+                            if (state.data.isVideoHasSeries) {
+                                if (_videoHistoryModel.value != null) {
+                                    _translatorId = _videoHistoryModel.value?.translatorId!!
+                                    _translatorName = _videoHistoryModel.value?.translatorName
+                                    getSeasonsByTranslatorId(_videoHistoryModel.value?.translatorId!!)
+                                } else
+                                    getSeasonsByTranslatorId(state.data.translations.values.first())
+                            } else
+                                updateData()
+                        }
+                    }
+                }.last()
+        }
+    }
+
+    fun selectTranslateForFilms(translatorId: String) {
+        viewModelScope.launch {
+            getStreamsByTranslatorId(translatorId)
+        }
+    }
+
+    fun selectTranslateForSerials(translationId: String) {
+        _translatorId = translationId
+        _translatorName = _videoData.value.translations.entries.firstOrNull { it.value == translationId }?.key
+        getSeasonsByTranslatorId(translationId)
+    }
+
+    fun onButtonFavouritesClick() {
+        viewModelScope.launch {
+            val videoPageUrl = Uri.parse(navArgs.movieUrl).path ?: EMPTY_STRING
+            val videoInfo = _screenState.value.detailInfo
+            if (_isVideoHasFavourites.value)
+                deleteFromFavouritesUseCase(videoInfo?.videoId ?: EMPTY_STRING)
+            else {
+                addToFavouritesUseCase(
+                    FavouritesModel(
+                        videoId = videoInfo?.videoId ?: EMPTY_STRING,
+                        videoPageUrl = videoPageUrl,
+                        videoTitle = videoInfo?.title ?: EMPTY_STRING,
+                        posterUrl = videoInfo?.imageUrl ?: EMPTY_STRING
+                    )
+                )
+            }
+        }
+    }
+
+    fun onEpisodeClicked(season: String, episode: String) {
+        _seasonAndEpisodeTitle = season to episode
+        _translatorId?.let { id ->
+            getStreamsBySeasonId(id, _videoData.value.videoId, season, episode)
+        }
+    }
+
+    fun onDialogDismiss() {
+        _showFilmDialog.value = false
+        _showSerialDialog.value = false
     }
 
     private fun getVideoDetailInfo() {
@@ -82,11 +169,19 @@ class DetailViewModel @Inject constructor(
                         is DtoState.Loading -> _screenState.value = DetailScreenState(isLoading = true)
                         is DtoState.Success -> {
                             _screenState.value = DetailScreenState(detailInfo = state.data)
+                            state.data?.let { data -> getFavourites(data.videoId) }
                             state.data?.let { data -> getVideoHistoryData(data.videoId) }
                         }
                     }
                 }.last()
         }
+    }
+
+    private fun getFavourites(videoId: String) {
+        getFavoriteByIdUseCase(videoId)
+            .onEach { favouritesModel ->
+                _isVideoHasFavourites.update { favouritesModel != null }
+            }.launchIn(viewModelScope)
     }
 
     private fun getVideoHistoryData(videoId: String) {
@@ -215,7 +310,6 @@ class DetailViewModel @Inject constructor(
                 _screenState.value.detailInfo?.let { detailInfo ->
                     val watchingTime = System.currentTimeMillis()
                     val videoPageUrl = Uri.parse(navArgs.movieUrl).path
-                    logger("translator name $_translatorName")
                     val model = VideoHistoryModel(
                         videoId = detailInfo.videoId,
                         videoPageUrl = videoPageUrl ?: EMPTY_STRING,
@@ -248,64 +342,5 @@ class DetailViewModel @Inject constructor(
 
     private fun showFilmDialog() {
         _showFilmDialog.value = true
-    }
-
-    fun getTranslations() {
-        viewModelScope.launch {
-            getTranslationsByUrlUseCase(navArgs.movieUrl)
-                .onEach { state ->
-                    when (state) {
-                        is DtoState.Error -> _screenState.value = DetailScreenState(
-                            detailInfo = _screenState.value.detailInfo,
-                            errorMessage = state.errorMessage
-                        )
-
-                        is DtoState.Loading -> _screenState.value = DetailScreenState(
-                            detailInfo = _screenState.value.detailInfo,
-                            isLoading = true
-                        )
-
-                        is DtoState.Success -> {
-                            _screenState.value = DetailScreenState(detailInfo = _screenState.value.detailInfo)
-                            _videoData.value = state.data!!
-                            _translatorId = state.data.translations.values.first()
-                            _translatorName = state.data.translations.keys.first()
-                            if (state.data.isVideoHasSeries) {
-                                if (_videoHistoryModel.value != null) {
-                                        _translatorId = _videoHistoryModel.value?.translatorId!!
-                                        _translatorName = _videoHistoryModel.value?.translatorName
-                                        getSeasonsByTranslatorId(_videoHistoryModel.value?.translatorId!!)
-                                } else
-                                    getSeasonsByTranslatorId(state.data.translations.values.first())
-                            } else
-                                updateData()
-                        }
-                    }
-                }.last()
-        }
-    }
-
-    fun selectTranslateForFilms(translatorId: String) {
-        viewModelScope.launch {
-            getStreamsByTranslatorId(translatorId)
-        }
-    }
-
-    fun selectTranslateForSerials(translationId: String) {
-        _translatorId = translationId
-        _translatorName = _videoData.value.translations.entries.firstOrNull { it.value == translationId }?.key
-        getSeasonsByTranslatorId(translationId)
-    }
-
-    fun onEpisodeClicked(season: String, episode: String) {
-        _seasonAndEpisodeTitle = season to episode
-        _translatorId?.let { id ->
-            getStreamsBySeasonId(id, _videoData.value.videoId, season, episode)
-        }
-    }
-
-    fun onDialogDismiss() {
-        _showFilmDialog.value = false
-        _showSerialDialog.value = false
     }
 }
