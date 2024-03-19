@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +33,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.tv.material3.Button
+import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
@@ -42,7 +42,6 @@ import coil.compose.SubcomposeAsyncImage
 import com.mihan.movie.library.R
 import com.mihan.movie.library.domain.models.VideoDetailModel
 import com.mihan.movie.library.presentation.animation.AnimatedScreenTransitions
-import com.mihan.movie.library.presentation.ui.size10dp
 import com.mihan.movie.library.presentation.ui.size16dp
 import com.mihan.movie.library.presentation.ui.size18dp
 import com.mihan.movie.library.presentation.ui.size18sp
@@ -286,12 +285,11 @@ private fun ButtonsSection(
                 .focusRequester(focusRequester)
         ) {
             Button(
-                shape = RoundedCornerShape(size4dp),
+                shape = ButtonDefaults.shape(RoundedCornerShape(size4dp)),
                 onClick = onButtonWatchClick,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                elevation = ButtonDefaults.elevatedButtonElevation(
-                    defaultElevation = size1dp,
-                    focusedElevation = size10dp
+                colors = ButtonDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
                 ),
                 modifier = modifier
                     .padding(start = size28dp)
@@ -304,12 +302,11 @@ private fun ButtonsSection(
                 )
             }
             Button(
-                shape = RoundedCornerShape(size4dp),
+                shape = ButtonDefaults.shape(RoundedCornerShape(size4dp)),
                 onClick = onButtonFavouritesClick,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                elevation = ButtonDefaults.elevatedButtonElevation(
-                    defaultElevation = size1dp,
-                    focusedElevation = size10dp
+                colors = ButtonDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
                 ),
                 modifier = modifier
                     .padding(start = size28dp)

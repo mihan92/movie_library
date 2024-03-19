@@ -2,6 +2,7 @@ package com.mihan.movie.library.presentation.screens.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,6 +75,7 @@ fun SettingsScreen(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
+        var isDevelopModeEnabled by remember { mutableStateOf(false) }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -95,7 +97,7 @@ fun SettingsScreen(
                 onColorItemClicked = settingsViewModel::primaryColorChanged
             )
             SiteUrl(onButtonClick = settingsViewModel::onButtonShowDialogClicked)
-            if (BuildConfig.DEBUG)
+            if (isDevelopModeEnabled)
                 RemoteParsing(
                     isRemoteParsingSelected = isRemoteParsingSelected,
                     settingsViewModel::onSwitchPressed
@@ -103,7 +105,8 @@ fun SettingsScreen(
         }
         Text(
             text = stringResource(id = R.string.app_version_title, BuildConfig.VERSION_NAME),
-            color = MaterialTheme.colorScheme.onBackground.copy(DESCRIPTION_TITLE_ALPHA)
+            color = MaterialTheme.colorScheme.onBackground.copy(DESCRIPTION_TITLE_ALPHA),
+            modifier = Modifier.clickable { isDevelopModeEnabled = !isDevelopModeEnabled }
         )
     }
     ChangingSiteUrlDialog(

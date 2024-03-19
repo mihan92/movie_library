@@ -181,7 +181,10 @@ private fun ButtonWatch(
             .padding(size16dp)
             .onFocusChanged { isFocused(it.isFocused) }
     ) {
-        Text(text = stringResource(id = R.string.bt_watch))
+        Text(
+            text = stringResource(id = R.string.bt_watch).uppercase(),
+            fontWeight = FontWeight.W700
+        )
     }
 }
 
